@@ -1,1 +1,3 @@
 raw scans/
+deploy/.env
+deploy_push_sync.sh
