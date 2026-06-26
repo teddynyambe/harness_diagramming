@@ -1,3 +1,6 @@
 raw scans/
 deploy/.env
 deploy_push_sync.sh
+PACCAR_Cummins_test_bench.json
+.DS_Store
+deploy.sh
