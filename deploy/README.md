@@ -80,12 +80,31 @@ backups at runtime); a blind `rsync --delete` of that folder wipes live edits.
 ```bash
 chmod +x deploy.sh                       # once
 
-./deploy.sh deploy "what changed"        # commit+push, then server git pull + rebuild
-                                         #   (DATA folder is never touched)
+./deploy.sh deploy  "what changed"       # code only: commit+push, server git pull + rebuild
+./deploy.sh publish "what changed"       # code + DATA: also push local configs -> production (dev)
 ./deploy.sh backup                       # copy production data -> local (SAFE direction)
 ./deploy.sh seed export.json [name]      # load ONE config onto production (default: 'default')
-                                         #   makes a server .bak first; no --delete
 ```
+
+### Dev workflow vs. launched
+
+- **While developing** (local is the source of truth): edit locally, then
+  `./deploy.sh publish "msg"` to push **code + data** together. For `publish` to
+  carry your data, your local edits must land in files at `LOCAL_DATA/configs/*.json`
+  — i.e. **run the app locally through the server** (see below), not as `file://`.
+  `publish` snapshots prod configs first and never deletes prod backups.
+- **After launch** (production is the source of truth): use `./deploy.sh deploy "msg"`
+  for code only and edit data in the production web app (it auto-saves). **Stop using
+  `publish`/`seed`** then, or you'll overwrite live production edits.
+
+Run the app locally so edits persist to files (enables `publish`):
+```bash
+cd deploy
+cp .env.example .env       # set DATA_DIR=/Users/<you>/code/data/harnes-bench (= LOCAL_DATA), HOST_PORT=8270
+docker compose up -d --build
+# edit at http://localhost:8270  -> saves to LOCAL_DATA/configs/default.json
+```
+Set `LOCAL_DATA` in `deploy.sh` to that same folder.
 
 Set the variables at the top of `deploy.sh` first: `SERVER`, `REMOTE_REPO`
 (the git checkout on the server that contains `deploy/`), `REMOTE_DATA`
