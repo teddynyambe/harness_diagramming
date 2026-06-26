@@ -13,6 +13,22 @@ deploy/
   data/                created on first run -> configs/ and backups/  (PERSISTED)
 ```
 
+## 0. Server prerequisites (one-time)
+
+On the server you need Docker + the Compose plugin, and your user must be able to
+talk to the Docker daemon **without sudo**, or `docker compose` fails with
+`permission denied … /var/run/docker.sock`:
+
+```bash
+sudo usermod -aG docker $USER     # add yourself to the docker group
+exit                              # log out/in so the new group applies
+docker compose version            # verify it works without sudo
+```
+
+(The `docker` group is effectively root — standard for a dev/bench host. If that's
+not allowed, run the compose commands with `sudo` and add a NOPASSWD sudoers entry
+so non-interactive SSH deploys don't hang on a password.)
+
 ## 1. Deploy
 
 ```bash
@@ -54,6 +70,36 @@ cd deploy/backend && pip install -r requirements.txt
 HARNESS_DATA_DIR=../data uvicorn app.main:app --port 8000
 # serve the project folder statically and proxy /api -> :8000
 ```
+
+## 1b. Ongoing updates — `deploy.sh` (CODE and DATA are separate)
+
+The repo root has `deploy.sh`. **Golden rule: deploy code with git; never push your
+local data folder over production.** The app owns `DATA_DIR` (it writes config +
+backups at runtime); a blind `rsync --delete` of that folder wipes live edits.
+
+```bash
+chmod +x deploy.sh                       # once
+
+./deploy.sh deploy "what changed"        # commit+push, then server git pull + rebuild
+                                         #   (DATA folder is never touched)
+./deploy.sh backup                       # copy production data -> local (SAFE direction)
+./deploy.sh seed export.json [name]      # load ONE config onto production (default: 'default')
+                                         #   makes a server .bak first; no --delete
+```
+
+Set the variables at the top of `deploy.sh` first: `SERVER`, `REMOTE_REPO`
+(the git checkout on the server that contains `deploy/`), `REMOTE_DATA`
+(= `DATA_DIR`), `LOCAL_BACKUP`. Requires Docker permissions from **§0** and SSH
+access to the server.
+
+Everyday loop: `./deploy.sh deploy "…"` for code; `./deploy.sh backup` for safety
+copies. Move data only via **Import/Export JSON** in the web UI or `./deploy.sh seed`.
+
+> First run gotcha: a fresh production server has no `configs/default.json`, so the
+> first browser to open it **seeds** the file (from the bundled example on a clean
+> browser). That's why a new server can show the example. Load your real data once
+> (Import JSON or `seed`) and it won't come back — seeding only happens when the
+> file is missing.
 
 ## 2. PRESERVE YOUR EXISTING DATA  ← do this once
 
