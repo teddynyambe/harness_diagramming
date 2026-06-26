@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 860" font-family="Helvetica,Arial,sans-serif">
+<rect x="0" y="0" width="1480" height="860" fill="#ffffff"/>
+<rect x="8" y="8" width="1464" height="844" fill="none" stroke="#222" stroke-width="2"/>
+<text x="740" y="40" text-anchor="middle" font-size="20" font-weight="700" fill="#111">DEF TANK SCHEMATIC — M96-1027 (Sheet 3) — clean reproduction</text>
+<text x="740" y="62" text-anchor="middle" font-size="12" fill="#666">Redrawn from verified scan data · wire = COLOR+circuit, trailing no.=gauge mm² · colour swatch matches wire colour</text>
+<rect x="470" y="110" width="34" height="552" fill="#f4f6f8" stroke="#222" stroke-width="1.5"/>
+<text x="487" y="684" text-anchor="middle" font-size="13" font-weight="700" fill="#111">J454</text>
+<text x="487" y="702" text-anchor="middle" font-size="11" fill="#444">AFTERTREATMENT HARNESS</text>
+<rect x="1170" y="110" width="34" height="184" fill="#f4f6f8" stroke="#222" stroke-width="1.5"/>
+<text x="1187" y="314" text-anchor="middle" font-size="12" font-weight="700" fill="#111">J936</text>
+<text x="1187" y="331" text-anchor="middle" font-size="10.5" fill="#444">UREA / DEF QUALITY SENSOR</text>
+<line x1="1204" y1="133.0" x2="1216" y2="133.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="130.0" text-anchor="end" font-size="10" fill="#111">4</text>
+<text x="1222" y="130.0" font-size="10.5" fill="#111">DEF QUALITY SENSOR GND</text>
+<text x="1222" y="144.0" font-size="9.5" fill="#666" font-family="monospace">WHT3263-4, 1.0</text>
+<line x1="1204" y1="179.0" x2="1216" y2="179.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="176.0" text-anchor="end" font-size="10" fill="#111">1</text>
+<text x="1222" y="176.0" font-size="10.5" fill="#111">DEF QUALITY SENSOR PWR</text>
+<text x="1222" y="190.0" font-size="9.5" fill="#666" font-family="monospace">YEL3263-4, 1.0</text>
+<line x1="1204" y1="225.0" x2="1216" y2="225.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="222.0" text-anchor="end" font-size="10" fill="#111">3</text>
+<text x="1222" y="222.0" font-size="10.5" fill="#111">A-CAN (+)</text>
+<text x="1222" y="236.0" font-size="9.5" fill="#666" font-family="monospace">YEL0818-5, 0.8</text>
+<line x1="1204" y1="271.0" x2="1216" y2="271.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="268.0" text-anchor="end" font-size="10" fill="#111">2</text>
+<text x="1222" y="268.0" font-size="10.5" fill="#111">A-CAN (−)</text>
+<text x="1222" y="282.0" font-size="9.5" fill="#666" font-family="monospace">GRN0818-5, 0.8</text>
+<rect x="1170" y="352" width="34" height="92" fill="#f4f6f8" stroke="#222" stroke-width="1.5"/>
+<text x="1187" y="464" text-anchor="middle" font-size="12" font-weight="700" fill="#111">J972</text>
+<text x="1187" y="481" text-anchor="middle" font-size="10.5" fill="#444">DEF TANK HEATING COOLANT VALVE</text>
+<line x1="1204" y1="375.0" x2="1216" y2="375.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="372.0" text-anchor="end" font-size="10" fill="#111">1</text>
+<text x="1222" y="372.0" font-size="10.5" fill="#111">DEF TANK HEAT COOL VLV CTRL</text>
+<text x="1222" y="386.0" font-size="9.5" fill="#666" font-family="monospace">GRA3239-2, 0.8</text>
+<line x1="1204" y1="421.0" x2="1216" y2="421.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="418.0" text-anchor="end" font-size="10" fill="#111">4</text>
+<text x="1222" y="418.0" font-size="10.5" fill="#111">DEF TANK HEAT COOL VLV GND</text>
+<text x="1222" y="432.0" font-size="9.5" fill="#666" font-family="monospace">BLK3239-2, 0.8</text>
+<rect x="1170" y="502" width="34" height="184" fill="#f4f6f8" stroke="#222" stroke-width="1.5"/>
+<text x="1187" y="706" text-anchor="middle" font-size="12" font-weight="700" fill="#111">J970</text>
+<text x="1187" y="723" text-anchor="middle" font-size="10.5" fill="#444">DEF PUMP</text>
+<line x1="1204" y1="525.0" x2="1216" y2="525.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="522.0" text-anchor="end" font-size="10" fill="#111">2</text>
+<text x="1222" y="522.0" font-size="10.5" fill="#111">DEF PUMP SUPPLY</text>
+<text x="1222" y="536.0" font-size="9.5" fill="#666" font-family="monospace">YEL3228-2, 1.0</text>
+<line x1="1204" y1="571.0" x2="1216" y2="571.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="568.0" text-anchor="end" font-size="10" fill="#111">4</text>
+<text x="1222" y="568.0" font-size="10.5" fill="#111">DEF PUMP GND</text>
+<text x="1222" y="582.0" font-size="9.5" fill="#666" font-family="monospace">BLK3228-2, 1.0</text>
+<line x1="1204" y1="617.0" x2="1216" y2="617.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="614.0" text-anchor="end" font-size="10" fill="#111">1</text>
+<text x="1222" y="614.0" font-size="10.5" fill="#111">DEF PUMP SPEED SIG</text>
+<text x="1222" y="628.0" font-size="9.5" fill="#666" font-family="monospace">BLU3228-2, 0.5</text>
+<line x1="1204" y1="663.0" x2="1216" y2="663.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="660.0" text-anchor="end" font-size="10" fill="#111">3</text>
+<text x="1222" y="660.0" font-size="10.5" fill="#111">DEF PUMP PWM CTRL</text>
+<text x="1222" y="674.0" font-size="9.5" fill="#666" font-family="monospace">GRA3228-2, 0.5</text>
+<rect x="1170" y="744" width="34" height="92" fill="#f4f6f8" stroke="#222" stroke-width="1.5"/>
+<text x="1187" y="856" text-anchor="middle" font-size="12" font-weight="700" fill="#111">J953</text>
+<text x="1187" y="873" text-anchor="middle" font-size="10.5" fill="#444">DEF LINE HEATER 3 – SUCTION</text>
+<line x1="1204" y1="767.0" x2="1216" y2="767.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="764.0" text-anchor="end" font-size="10" fill="#111">2</text>
+<text x="1222" y="764.0" font-size="10.5" fill="#111">DEF LINE HEATER 3 GND</text>
+<text x="1222" y="778.0" font-size="9.5" fill="#666" font-family="monospace">WHT3237-6, 0.5</text>
+<line x1="1204" y1="813.0" x2="1216" y2="813.0" stroke="#222" stroke-width="1.3"/>
+<text x="1200" y="810.0" text-anchor="end" font-size="10" fill="#111">1</text>
+<text x="1222" y="810.0" font-size="10.5" fill="#111">DEF LINE HEATER 3 PWR</text>
+<text x="1222" y="824.0" font-size="9.5" fill="#666" font-family="monospace">YEL3237-6, 0.5</text>
+<rect x="815" y="163.0" width="120" height="44" rx="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="875" y="183.0" text-anchor="middle" font-size="11" font-weight="700">R114 120Ω</text>
+<text x="875" y="223.0" text-anchor="middle" font-size="10" fill="#444">A-CAN TERMINATING RESISTOR (P114)</text>
+<line x1="470" y1="133.0" x2="458" y2="133.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="130.0" text-anchor="end" font-size="10.5" fill="#111">DEF QUALITY SENSOR GND</text>
+<text x="454" y="144.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">WHT3263-4, 1.0</text>
+<text x="487" y="137.0" text-anchor="middle" font-size="10" fill="#111">1</text>
+<polyline points="504,133.0 522,133.0 522,133.0 1216,133.0" fill="none" stroke="#d8d8d8" stroke-width="2"/>
+<line x1="470" y1="179.0" x2="458" y2="179.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="176.0" text-anchor="end" font-size="10.5" fill="#111">DEF QUALITY SENSOR PWR</text>
+<text x="454" y="190.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">YEL3263-4, 1.0</text>
+<text x="487" y="183.0" text-anchor="middle" font-size="10" fill="#111">2</text>
+<polyline points="504,179.0 548,179.0 548,179.0 1216,179.0" fill="none" stroke="#e8b800" stroke-width="2"/>
+<line x1="470" y1="225.0" x2="458" y2="225.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="222.0" text-anchor="end" font-size="10.5" fill="#111">A-CAN (+)</text>
+<text x="454" y="236.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">YEL0818-4, 0.8</text>
+<text x="487" y="229.0" text-anchor="middle" font-size="10" fill="#111">3</text>
+<polyline points="504,225.0 574,225.0 574,179.0 815,179.0" fill="none" stroke="#e8b800" stroke-width="2"/>
+<polyline points="935,179.0 1138,179.0 1138,225.0 1216,225.0" fill="none" stroke="#e8b800" stroke-width="2" stroke-dasharray="5 3"/>
+<line x1="470" y1="271.0" x2="458" y2="271.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="268.0" text-anchor="end" font-size="10.5" fill="#111">A-CAN (−)</text>
+<text x="454" y="282.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">GRN0818-4, 0.8</text>
+<text x="487" y="275.0" text-anchor="middle" font-size="10" fill="#111">4</text>
+<polyline points="504,271.0 600,271.0 600,191.0 815,191.0" fill="none" stroke="#2faf50" stroke-width="2"/>
+<polyline points="935,191.0 1137,191.0 1137,271.0 1216,271.0" fill="none" stroke="#2faf50" stroke-width="2" stroke-dasharray="5 3"/>
+<line x1="470" y1="317.0" x2="458" y2="317.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="314.0" text-anchor="end" font-size="10.5" fill="#111">DEF TANK HEAT COOL VLV CTRL</text>
+<text x="454" y="328.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">GRA3239-2, 0.8</text>
+<text x="487" y="321.0" text-anchor="middle" font-size="10" fill="#111">5</text>
+<polyline points="504,317.0 626,317.0 626,375.0 1216,375.0" fill="none" stroke="#8a96a3" stroke-width="2"/>
+<line x1="470" y1="363.0" x2="458" y2="363.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="360.0" text-anchor="end" font-size="10.5" fill="#111">DEF TANK HEAT COOL VLV GND</text>
+<text x="454" y="374.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">BLK3239-2, 0.8</text>
+<text x="487" y="367.0" text-anchor="middle" font-size="10" fill="#111">6</text>
+<polyline points="504,363.0 652,363.0 652,421.0 1216,421.0" fill="none" stroke="#222" stroke-width="2"/>
+<line x1="470" y1="409.0" x2="458" y2="409.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="406.0" text-anchor="end" font-size="10.5" fill="#111">DEF PUMP SUPPLY</text>
+<text x="454" y="420.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">YEL3228-2, 1.0</text>
+<text x="487" y="413.0" text-anchor="middle" font-size="10" fill="#111">7</text>
+<polyline points="504,409.0 678,409.0 678,525.0 1216,525.0" fill="none" stroke="#e8b800" stroke-width="2"/>
+<line x1="470" y1="455.0" x2="458" y2="455.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="452.0" text-anchor="end" font-size="10.5" fill="#111">DEF PUMP GND</text>
+<text x="454" y="466.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">BLK3228-2, 1.0</text>
+<text x="487" y="459.0" text-anchor="middle" font-size="10" fill="#111">8</text>
+<polyline points="504,455.0 704,455.0 704,571.0 1216,571.0" fill="none" stroke="#222" stroke-width="2"/>
+<line x1="470" y1="501.0" x2="458" y2="501.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="498.0" text-anchor="end" font-size="10.5" fill="#111">DEF PUMP SPEED SIG</text>
+<text x="454" y="512.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">BLU3228-2, 0.5</text>
+<text x="487" y="505.0" text-anchor="middle" font-size="10" fill="#111">9</text>
+<polyline points="504,501.0 730,501.0 730,617.0 1216,617.0" fill="none" stroke="#2f6df0" stroke-width="2"/>
+<line x1="470" y1="547.0" x2="458" y2="547.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="544.0" text-anchor="end" font-size="10.5" fill="#111">DEF PUMP PWM CTRL</text>
+<text x="454" y="558.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">GRA3228-2, 0.5</text>
+<text x="487" y="551.0" text-anchor="middle" font-size="10" fill="#111">10</text>
+<polyline points="504,547.0 756,547.0 756,663.0 1216,663.0" fill="none" stroke="#8a96a3" stroke-width="2"/>
+<line x1="470" y1="593.0" x2="458" y2="593.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="590.0" text-anchor="end" font-size="10.5" fill="#111">DEF LINE HEATER 3 GND – SUCTION</text>
+<text x="454" y="604.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">WHT3237-6, 0.5</text>
+<text x="487" y="597.0" text-anchor="middle" font-size="10" fill="#111">11</text>
+<polyline points="504,593.0 782,593.0 782,767.0 1216,767.0" fill="none" stroke="#d8d8d8" stroke-width="2"/>
+<line x1="470" y1="639.0" x2="458" y2="639.0" stroke="#222" stroke-width="1.3"/>
+<text x="454" y="636.0" text-anchor="end" font-size="10.5" fill="#111">DEF LINE HEATER 3 PWR – SUCTION</text>
+<text x="454" y="650.0" text-anchor="end" font-size="9.5" fill="#666" font-family="monospace">YEL3237-6, 0.5</text>
+<text x="487" y="643.0" text-anchor="middle" font-size="10" fill="#111">12</text>
+<polyline points="504,639.0 808,639.0 808,813.0 1216,813.0" fill="none" stroke="#e8b800" stroke-width="2"/>
+<rect x="1010" y="774" width="454" height="70" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<line x1="1310" y1="774" x2="1310" y2="844" stroke="#222"/>
+<line x1="1010" y1="809" x2="1464" y2="809" stroke="#222"/>
+<text x="1160" y="796" text-anchor="middle" font-size="13" font-weight="700">SCHEM-2017 DEF TANK L/M</text>
+<text x="1160" y="830" text-anchor="middle" font-size="11" fill="#444">PACCAR · harness M92-1037</text>
+<text x="1387" y="796" text-anchor="middle" font-size="13" font-weight="700">M96-1027</text>
+<text x="1387" y="830" text-anchor="middle" font-size="11" fill="#444">REV A · SHEET 3 OF 4</text>
+</svg>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Interconnection Map — Bench Topology (live)</title>
+<style>
+  :root{--bg:#0e1116;--panel:#161b22;--panel2:#1c232d;--line:#2b3340;--txt:#e6edf3;--muted:#9aa7b4;
+        --jbus:#3fb950;--vbus:#4aa3ff;--abus:#ffb454;--accent:#4aa3ff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:16px;margin:0;font-weight:650}
+  header .sub{font-size:12px;color:var(--muted)}
+  .spacer{flex:1}
+  button{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  .wrap{max-width:1260px;margin:0 auto;padding:16px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:4px 0 12px}
+  .legend b{color:var(--txt)} .chip{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:12px;height:12px;border-radius:50%} .d-j{background:var(--jbus)}.d-v{background:var(--vbus)}.d-a{background:var(--abus)}
+  .diagram{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px;margin-bottom:18px;overflow:auto}
+  #svg{display:block;width:100%;height:auto;min-width:980px}
+  .port{cursor:pointer}
+  h2.section{font-size:14px;color:var(--accent);margin:22px 0 8px;border-bottom:1px solid var(--line);padding-bottom:6px;display:flex;align-items:center;gap:10px}
+  .hcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+  .hhead{padding:10px 13px;border-bottom:1px solid var(--line);background:var(--panel2);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .hhead .nm{font-weight:650;font-size:14px}.hhead .dw{font-size:11px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+  .bc{font-size:10px;border-radius:20px;padding:1px 8px;border:1px solid}
+  .bc.j{color:var(--jbus);border-color:#2e5226}.bc.v{color:var(--vbus);border-color:#274055}.bc.a{color:var(--abus);border-color:#5a4422}
+  .conn{border-top:1px dashed var(--line);padding:11px 13px}
+  .crow{display:flex;gap:10px}
+  .imgslot{width:78px;min-width:78px;height:60px;border:1px dashed var(--line);border-radius:8px;background:#0d1218 center/cover no-repeat;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+  .imgslot.has{border-style:solid}.imgslot .ph{font-size:8.5px;color:var(--muted);text-align:center;line-height:1.25;padding:2px}
+  .cf{flex:1;display:flex;flex-direction:column;gap:5px}
+  .cf label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:-2px}
+  .cf input,.cf select{width:100%;background:#0d1218;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 7px}
+  .cf input:focus,.cf select:focus{outline:none;border-color:var(--accent)}
+  .row2{display:flex;gap:8px} .pn input{font-family:ui-monospace,Menlo,monospace;color:#7ee06a}
+  .circuits{margin-top:8px;background:#10161d;border:1px solid var(--line);border-radius:8px;padding:8px}
+  .circuits .ct{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;display:flex;justify-content:space-between}
+  .circ{display:flex;gap:6px;margin-bottom:5px;align-items:center}
+  .circ input{background:#0d1218;border:1px solid var(--line);border-radius:5px;color:var(--txt);font-size:11px;padding:4px 6px}
+  .circ .code{flex:0 0 30%;font-family:ui-monospace,Menlo,monospace}.circ .sig{flex:1}.circ .trm{flex:0 0 56px;text-align:center}
+  .mini{font-size:10px;background:transparent;border:0;color:var(--muted);cursor:pointer;padding:2px 4px}
+  .addc{margin:8px 13px 12px;font-size:12px}
+  .note{font-size:11.5px;color:var(--muted);background:#131a22;border:1px dashed var(--line);border-radius:8px;padding:11px 13px;margin:8px 0 16px;line-height:1.55}
+  .note code{background:#0d1218;padding:1px 5px;border-radius:4px}
+  @media print{body{background:#fff;color:#000}header,.addc,.mini,.toolbar,#exportBtn,#printBtn,#resetBtn,#addHarnessBtn{display:none!important}
+    .diagram,.hcard,.note{border-color:#bbb;background:#fff}.hhead,.cf input,.cf select,.imgslot,.circuits,.circ input{background:#fff}
+    #svg text{fill:#000!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔌 Harness Interconnection Map</h1><span class="sub">live · diagram regenerates from your edits</span>
+  <div class="spacer"></div>
+  <button id="printBtn">🖨 Print / PDF</button>
+  <button id="exportBtn">⭳ Export JSON</button>
+  <button id="resetBtn">↺ Reset</button>
+</header>
+<div class="wrap">
+  <div class="legend">
+    <span class="chip"><span class="dot d-j"></span><b>J1939</b> engine/chassis</span>
+    <span class="chip"><span class="dot d-v"></span><b>V-CAN</b> cab/body</span>
+    <span class="chip"><span class="dot d-a"></span><b>A-CAN</b> aftertreatment</span>
+    <span class="chip">▭ ports on box edges = P/J connectors · number badge = circuits in that connector · lines = mate to other side</span>
+  </div>
+  <div class="diagram"><div id="svgbox"></div></div>
+  <div class="note"><b>How it works:</b> edit anything below and the diagram above redraws instantly. Each harness box shows its connectors as <b>ports on its boundary</b>; the small badge on a port is the <b>circuit count</b> (hover a port to list them). Set a connector's <b>“Connects to”</b> dropdown to draw the mating line. Add <b>circuits</b> inside any connector with “+ circuit”. Add a connector photo by clicking its image box, or drop <code>&lt;key&gt;.jpg</code> into <code>harness_connectors/</code> (key shown in the empty box). Edits persist in your browser; use Export JSON to back up, Print/PDF for the one-pager.</div>
+  <div id="cards"></div>
+  <button id="addHarnessBtn" style="margin:6px 0 30px">+ add harness / module</button>
+</div>
+<input type="file" id="filepick" accept="image/*" style="display:none">
+<script>
+const BUSNAME={j:"J1939",v:"V-CAN",a:"A-CAN"};
+const BUSCOL={j:"#3fb950",v:"#4aa3ff",a:"#ffb454"};
+function DEF(){return [
+ {id:"cumminsECU",name:"Cummins Engine ECU",dwg:"CM2350 (verify)",kind:"module",bus:["j"],box:{x:40,y:470,w:190,h:74},connectors:[]},
+ {id:"engine",name:"Engine Harness — Cummins",dwg:"P5336409",kind:"harness",bus:["j"],box:{x:40,y:300,w:210,h:120},connectors:[
+   {ref:"OEM Connector",pn:"",type:"Cummins OEM connector",link:"chassis/3",img:"",circuits:[]},
+   {ref:"Engine Connector",pn:"",type:"Cummins engine connector",link:"cumminsECU",img:"",circuits:[]},
+   {ref:"Aftertreatment",pn:"",type:"inline to SCR",link:"aftertreatment/0",img:"",circuits:[]},
+ ]},
+ {id:"aftertreatment",name:"MX Aftertreatment Harness",dwg:"M96-1036 (M92-1048)",kind:"harness",bus:["a","j"],box:{x:360,y:80,w:220,h:130},connectors:[
+   {ref:"P417",pn:"P20-1390",type:"29-way HDP20 recept",link:"engine/2",img:"",circuits:[]},
+   {ref:"P133",pn:"P20-6377-2921",type:"2-way DT plug",link:"chassis/1",img:"",circuits:[]},
+   {ref:"P456",pn:"P20-6137",type:"16-way AMP/MCP plug",link:"chassis/2",img:"",circuits:[]},
+   {ref:"P450A",pn:"P20-1258-2116-99314",type:"60-way ACM connector",link:"acm",img:"",circuits:[]},
+   {ref:"J454",pn:"P20-1193-12029",type:"2-way Super Seal plug",link:"deftank/0",img:"",circuits:[]},
+   {ref:"J951",pn:"P20-1372-2302H",type:"2-way DT",link:"",img:"",circuits:[]},
+ ]},
+ {id:"deftank",name:"DEF Tank Harness",dwg:"M96-1027 (M92-1037)",kind:"harness",bus:["a"],box:{x:660,y:80,w:210,h:130},connectors:[
+   {ref:"J454",pn:"(mates aftertmt J454)",type:"12-way interface",link:"aftertreatment/4",img:"",circuits:[
+     {code:"WHT3263-4",signal:"DEF QUALITY SENSOR GND",term:"1"},
+     {code:"YEL3263-4",signal:"DEF QUALITY SENSOR PWR",term:"2"},
+     {code:"YEL0818-4",signal:"A-CAN (+)",term:"3"},
+     {code:"GRN0818-4",signal:"A-CAN (-)",term:"4"},
+     {code:"YEL3228-2",signal:"DEF PUMP SUPPLY",term:"7"},
+     {code:"BLK3228-2",signal:"DEF PUMP GND",term:"8"}]},
+   {ref:"R114 / P114",pn:"A-CAN 120Ω terminator",type:"CAN terminator",link:"",img:"",circuits:[]},
+   {ref:"J936",pn:"(see BOM)",type:"4-way",link:"",img:"",circuits:[]},
+   {ref:"J970",pn:"(see BOM)",type:"4-way",link:"",img:"",circuits:[]},
+   {ref:"J972",pn:"(see BOM)",type:"2-way",link:"",img:"",circuits:[]},
+   {ref:"J953",pn:"(see BOM)",type:"2-way",link:"",img:"",circuits:[]},
+ ]},
+ {id:"acm",name:"ACM — Aftertreatment Ctrl Module",dwg:"device",kind:"module",bus:["a","j"],box:{x:940,y:90,w:160,h:80},connectors:[]},
+ {id:"chassis",name:"Chassis Harness",dwg:"P96-1080",kind:"harness",bus:["v","j"],box:{x:360,y:300,w:220,h:130},connectors:[
+   {ref:"Cab bulkhead",pn:"",type:"firewall pass-through",link:"cecu3/2",img:"",circuits:[]},
+   {ref:"Aftertmt-A",pn:"",type:"inline",link:"aftertreatment/1",img:"",circuits:[]},
+   {ref:"Aftertmt-B",pn:"",type:"inline",link:"aftertreatment/2",img:"",circuits:[]},
+   {ref:"Engine OEM",pn:"",type:"bulkhead",link:"engine/0",img:"",circuits:[]},
+   {ref:"J123",pn:"P20-1326-110291",type:"2-way DTHL (verify)",link:"",img:"",circuits:[]},
+ ]},
+ {id:"cecu3",name:"CECU3 — Cab ECU",dwg:"G01-1076-0-000",kind:"harness",bus:["v"],box:{x:660,y:300,w:210,h:130},connectors:[
+   {ref:"Conn A",pn:"P20-1183-1209",type:"9-way JPT (mates)",link:"",img:"",circuits:[]},
+   {ref:"Conn B",pn:"P20-1172-1224",type:"24-way MQS (mates)",link:"",img:"",circuits:[]},
+   {ref:"Conn C",pn:"P20-1172-1252",type:"52-way MQS (mates)",link:"chassis/0",img:"",circuits:[]},
+   {ref:"Conn D",pn:"P20-1172-1240",type:"40-way MQS (mates)",link:"",img:"",circuits:[]},
+   {ref:"Conn E",pn:"P20-1183-2209",type:"9-way JPT (mates)",link:"",img:"",circuits:[]},
+ ]},
+ {id:"ip",name:"Instrument Panel Harness",dwg:"P96-1090",kind:"harness",bus:["v"],box:{x:940,y:300,w:160,h:130},connectors:[
+   {ref:"IP-to-cab",pn:"(BOM sh.43-44)",type:"inline",link:"cecu3",img:"",circuits:[]},
+ ]},
+];}
+const KEY="harnessMap.v2";
+let MODEL;
+try{const s=localStorage.getItem(KEY);MODEL=s?JSON.parse(s):DEF();}catch(e){MODEL=DEF();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(MODEL));}catch(e){}}
+function H(id){return MODEL.find(h=>h.id===id);}
+function esc(s){return String(s==null?"":s).replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+function sanitize(s){return String(s).replace(/[^a-zA-Z0-9]+/g,"_").replace(/^_|_$/g,"");}
+
+/* ---------- DIAGRAM ---------- */
+function diagram(){
+  // extents
+  let maxX=0,maxY=0; MODEL.forEach(h=>{maxX=Math.max(maxX,h.box.x+h.box.w);maxY=Math.max(maxY,h.box.y+h.box.h);});
+  const W=maxX+60,Hh=maxY+70;
+  const boxOf={}; MODEL.forEach(h=>boxOf[h.id]={...h.box,cx:h.box.x+h.box.w/2,cy:h.box.y+h.box.h/2});
+  // side for each connector based on link target geometry
+  function targetBox(link){if(!link)return null;const id=link.split("/")[0];return boxOf[id]||null;}
+  function sideFor(h,c){const b=boxOf[h.id];const t=targetBox(c.link);if(!t)return"R";
+    const dx=t.cx-b.cx,dy=t.cy-b.cy;return Math.abs(dx)>=Math.abs(dy)?(dx>0?"R":"L"):(dy>0?"B":"T");}
+  // group connectors by side, compute port coords
+  const port={}; // "hid/idx" -> {x,y,side}
+  MODEL.forEach(h=>{
+    const groups={L:[],R:[],T:[],B:[]};
+    (h.connectors||[]).forEach((c,i)=>{const s=c.side||sideFor(h,c);groups[s].push(i);});
+    const b=boxOf[h.id];
+    Object.keys(groups).forEach(s=>{const arr=groups[s];arr.forEach((idx,k)=>{
+      const f=(k+1)/(arr.length+1);let x,y;
+      if(s==="R"){x=b.x+b.w;y=b.y+b.h*f;} else if(s==="L"){x=b.x;y=b.y+b.h*f;}
+      else if(s==="T"){y=b.y;x=b.x+b.w*f;} else {y=b.y+b.h;x=b.x+b.w*f;}
+      port[h.id+"/"+idx]={x,y,side:s};
+    });});
+  });
+  function edgePoint(b,fromx,fromy){const x=Math.max(b.x,Math.min(fromx,b.x+b.w)),y=Math.max(b.y,Math.min(fromy,b.y+b.h));
+    // push to nearest edge
+    const dl=x-b.x,dr=b.x+b.w-x,dt=y-b.y,db=b.y+b.h-y,m=Math.min(dl,dr,dt,db);
+    if(m===dl)return{x:b.x,y};if(m===dr)return{x:b.x+b.w,y};if(m===dt)return{x,y:b.y};return{x,y:b.y+b.h};}
+  let s=`<svg id="svg" viewBox="0 0 ${W} ${Hh}" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica,Arial,sans-serif">`;
+  // links (dedup)
+  const seen=new Set(); let linkSvg="";
+  MODEL.forEach(h=>(h.connectors||[]).forEach((c,i)=>{
+    if(!c.link)return; const srcKey=h.id+"/"+i; const sp=port[srcKey]; if(!sp)return;
+    let dp,dstKey;
+    if(c.link.includes("/")){dstKey=c.link;dp=port[c.link];if(!dp)return;}
+    else{const b=boxOf[c.link];if(!b)return;dstKey=c.link;dp=edgePoint(b,sp.x,sp.y);}
+    const pk=[srcKey,dstKey].sort().join("|"); if(seen.has(pk))return; seen.add(pk);
+    const mx=(sp.x+dp.x)/2;
+    linkSvg+=`<path d="M${sp.x},${sp.y} C ${mx},${sp.y} ${mx},${dp.y} ${dp.x},${dp.y}" fill="none" stroke="#6b7787" stroke-width="2"/>`;
+  }));
+  s+=linkSvg;
+  // boxes
+  MODEL.forEach(h=>{const b=boxOf[h.id];const isMod=h.kind==="module";
+    s+=`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="11" fill="${isMod?'#10161d':'#161b22'}" stroke="${isMod?'#5a4422':'#3a4756'}" ${isMod?'stroke-dasharray="4 3"':''}/>`;
+    s+=`<text x="${b.cx}" y="${b.y+24}" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">${escSvg(h.name)}</text>`;
+    s+=`<text x="${b.cx}" y="${b.y+41}" text-anchor="middle" font-size="10" fill="#7e8b99" font-family="monospace">${escSvg(h.dwg)}</text>`;
+    // bus dots
+    (h.bus||[]).forEach((bs,k)=>{s+=`<circle cx="${b.x+12+k*14}" cy="${b.y+12}" r="5" fill="${BUSCOL[bs]}"/>`;});
+  });
+  // ports
+  MODEL.forEach(h=>(h.connectors||[]).forEach((c,i)=>{
+    const p=port[h.id+"/"+i]; if(!p)return; const n=(c.circuits||[]).length;
+    const tip=(c.circuits||[]).map(z=>`${z.code} ${z.signal} (t${z.term})`).join("\n")||c.type||"";
+    s+=`<g class="port" onclick="scrollToConn('${h.id}',${i})"><title>${escSvg(c.ref)} — ${escSvg(c.pn||c.type)}${tip?"\n"+escSvg(tip):""}</title>`;
+    s+=`<rect x="${p.x-6}" y="${p.y-6}" width="12" height="12" rx="2" fill="#0d1218" stroke="#9aa7b4" stroke-width="1.5"/>`;
+    // ref label, placed outside the box
+    let lx=p.x,ly=p.y,anc="middle";
+    if(p.side==="R"){lx=p.x+9;anc="start";} else if(p.side==="L"){lx=p.x-9;anc="end";}
+    else if(p.side==="T"){ly=p.y-9;} else {ly=p.y+16;}
+    s+=`<text x="${lx}" y="${ly+3}" text-anchor="${anc}" font-size="9.5" fill="#cdd6df">${escSvg(c.ref)}</text>`;
+    if(n>0){s+=`<circle cx="${p.x+ (p.side==='L'?-0:0)}" cy="${p.y}" r="0"/>`;
+      s+=`<circle cx="${p.x+7}" cy="${p.y-7}" r="7" fill="${BUSCOL.a}"/><text x="${p.x+7}" y="${p.y-4}" text-anchor="middle" font-size="9" font-weight="700" fill="#000">${n}</text>`;}
+    s+=`</g>`;
+  }));
+  s+=`</svg>`;
+  document.getElementById("svgbox").innerHTML=s;
+}
+function escSvg(t){return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+/* ---------- CARDS ---------- */
+function targetOptions(selfId,cur){
+  let o=`<option value="">— none —</option>`;
+  MODEL.forEach(h=>{
+    o+=`<option value="${h.id}" ${cur===h.id?"selected":""}>${esc(h.name)} (any)</option>`;
+    (h.connectors||[]).forEach((c,i)=>{const v=h.id+"/"+i; if(h.id===selfId)return;
+      o+=`<option value="${v}" ${cur===v?"selected":""}>${esc(h.name)} · ${esc(c.ref)}</option>`;});
+  });
+  return o;
+}
+function cards(){
+  const wrap=document.getElementById("cards");
+  wrap.innerHTML=MODEL.map(h=>`
+   <h2 class="section">${esc(h.name)} <span style="color:var(--muted);font-weight:400;font-family:ui-monospace;font-size:12px">${esc(h.dwg)}</span>
+     ${h.kind==="module"?'<span class="bc a" style="border-color:#5a4422">module</span>':''}</h2>
+   <div class="hcard">
+     <div class="hhead"><span class="nm">${esc(h.name)}</span><span class="dw">${esc(h.dwg)}</span>
+       ${(h.bus||[]).map(b=>`<span class="bc ${b}">${BUSNAME[b]}</span>`).join("")}</div>
+     <div>${(h.connectors||[]).map((c,i)=>connHtml(h.id,c,i)).join("")||'<div class="conn" style="color:var(--muted);font-size:12px">No connectors. Use “+ add connector”.</div>'}</div>
+     <button class="addc" onclick="addConn('${h.id}')">+ add connector</button>
+   </div>`).join("");
+  MODEL.forEach(h=>(h.connectors||[]).forEach((c,i)=>loadSlot(h.id,i)));
+}
+function connHtml(hid,c,i){
+  const key=hid+"__"+sanitize(c.ref);
+  const circ=(c.circuits||[]).map((z,j)=>`
+    <div class="circ">
+      <input class="code" placeholder="circuit e.g. BLK3216-4" value="${esc(z.code)}" onchange="setCirc('${hid}',${i},${j},'code',this.value)">
+      <input class="sig" placeholder="signal / description" value="${esc(z.signal)}" onchange="setCirc('${hid}',${i},${j},'signal',this.value)">
+      <input class="trm" placeholder="pin" value="${esc(z.term)}" onchange="setCirc('${hid}',${i},${j},'term',this.value)">
+      <button class="mini" onclick="delCirc('${hid}',${i},${j})">✕</button>
+    </div>`).join("");
+  return `<div class="conn" id="conn-${hid}-${i}">
+    <div class="crow">
+      <div class="imgslot" id="slot-${hid}-${i}" data-key="${key}" onclick="pick('${hid}',${i})"><span class="ph">add image<br><b style="color:#6b7787">${key}.jpg</b></span></div>
+      <div class="cf">
+        <div class="row2">
+          <div style="flex:0 0 40%"><label>P/J code (ref)</label><input class="ref" value="${esc(c.ref)}" onchange="setC('${hid}',${i},'ref',this.value)"></div>
+          <div style="flex:1"><label>Type / ways</label><input value="${esc(c.type)}" onchange="setC('${hid}',${i},'type',this.value)"></div>
+        </div>
+        <div class="pn"><label>Part number</label><input value="${esc(c.pn)}" onchange="setC('${hid}',${i},'pn',this.value)"></div>
+        <div><label>Connects to (other side)</label><select onchange="setC('${hid}',${i},'link',this.value)">${targetOptions(hid,c.link)}</select></div>
+      </div>
+    </div>
+    <div class="circuits">
+      <div class="ct"><span>Circuits in this connector (${(c.circuits||[]).length})</span><button class="mini" onclick="delConn('${hid}',${i})">✕ remove connector</button></div>
+      ${circ}
+      <button class="mini" style="color:var(--accent)" onclick="addCirc('${hid}',${i})">+ circuit</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- mutations ---------- */
+function setC(hid,i,k,v){H(hid).connectors[i][k]=v;save();redraw();}
+function addConn(hid){H(hid).connectors.push({ref:"NEW",pn:"",type:"",link:"",img:"",circuits:[]});save();redraw();}
+function delConn(hid,i){H(hid).connectors.splice(i,1);save();redraw();}
+function addCirc(hid,i){const c=H(hid).connectors[i];c.circuits=c.circuits||[];c.circuits.push({code:"",signal:"",term:""});save();redraw();}
+function setCirc(hid,i,j,k,v){H(hid).connectors[i].circuits[j][k]=v;save();redraw();}
+function delCirc(hid,i,j){H(hid).connectors[i].circuits.splice(j,1);save();redraw();}
+function addHarness(){const id="h"+Date.now();const n=MODEL.length;
+  MODEL.push({id,name:"New Harness",dwg:"",kind:"harness",bus:[],box:{x:40+((n%5)*230),y:560+Math.floor(n/5)*150,w:200,h:120},connectors:[]});save();redraw();}
+function redraw(){diagram();cards();}
+
+/* ---------- images ---------- */
+function loadSlot(hid,i){const slot=document.getElementById(`slot-${hid}-${i}`);if(!slot)return;
+  const c=H(hid).connectors[i];const key=slot.dataset.key;
+  const show=src=>{slot.style.backgroundImage=`url('${src}')`;slot.classList.add("has");const ph=slot.querySelector(".ph");if(ph)ph.style.display="none";};
+  if(c.img){show(c.img);return;}
+  const t=(src,next)=>{const im=new Image();im.onload=()=>show(src);im.onerror=next;im.src=src;};
+  t(`harness_connectors/${key}.jpg`,()=>t(`harness_connectors/${key}.png`,()=>{}));
+}
+let pickT=null;
+function pick(hid,i){pickT=[hid,i];document.getElementById("filepick").click();}
+document.getElementById("filepick").addEventListener("change",function(){
+  const f=this.files[0];if(!f||!pickT)return;const r=new FileReader();
+  r.onload=()=>{const[hid,i]=pickT;H(hid).connectors[i].img=r.result;save();loadSlot(hid,i);};
+  r.readAsDataURL(f);this.value="";});
+function scrollToConn(hid,i){const el=document.getElementById(`conn-${hid}-${i}`);if(el){el.scrollIntoView({behavior:"smooth",block:"center"});el.style.transition="background .2s";el.style.background="#1d2a38";setTimeout(()=>el.style.background="",900);}}
+
+/* ---------- toolbar ---------- */
+document.getElementById("printBtn").onclick=()=>window.print();
+document.getElementById("resetBtn").onclick=()=>{if(confirm("Reset to defaults? Your edits and images will be lost.")){MODEL=DEF();save();redraw();}};
+document.getElementById("addHarnessBtn").onclick=addHarness;
+document.getElementById("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(MODEL,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="harness_map.json";a.click();};
+redraw();
+</script>
+</body>
+</html>

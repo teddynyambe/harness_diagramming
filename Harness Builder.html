@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Builder — Configuration</title>
+<style>
+  :root{--bg:#0e1116;--panel:#161b22;--panel2:#1c232d;--line:#2b3340;--txt:#e6edf3;--muted:#9aa7b4;--accent:#4aa3ff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{display:flex;align-items:center;gap:10px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:5}
+  header h1{font-size:16px;margin:0;font-weight:650}.spacer{flex:1}
+  a.btn,button{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;text-decoration:none}
+  a.btn:hover,button:hover{border-color:var(--accent)}
+  .wrap{max-width:1120px;margin:0 auto;padding:16px}
+  input,select{background:#0d1218;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 7px}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  label.l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin:0 0 2px}
+  .cfgbar{display:flex;gap:10px;align-items:end;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px;flex-wrap:wrap}
+  .hcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden}
+  .hhead{display:flex;gap:10px;align-items:end;flex-wrap:wrap;padding:11px 13px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .buschk{display:flex;gap:10px;font-size:12px;color:var(--muted);align-items:center}
+  .buschk label{display:flex;gap:4px;align-items:center}
+  .conn{border-top:1px solid var(--line);padding:12px 13px}
+  .conn.J{background:#15110a44}
+  .crow{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+  .imgcell{display:flex;flex-direction:column;gap:4px;align-items:center}
+  .thumb{width:84px;height:62px;border:1px dashed var(--line);border-radius:8px;background:#0d1218 center/cover no-repeat;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;color:var(--muted);text-align:center}
+  .thumb.has{border-style:solid}
+  .grow{flex:1;min-width:120px}
+  .dev{background:#15211a;border:1px solid #2e5226;border-radius:9px;padding:10px;margin-top:10px}
+  .dev .h{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#7ee06a;margin-bottom:6px}
+  .circwrap{background:#10161d;border:1px solid var(--line);border-radius:9px;padding:9px;margin-top:10px}
+  .circhead,.circrow{display:grid;grid-template-columns:64px 90px 56px 64px 1fr 48px 26px;gap:6px;align-items:center}
+  .circhead{font-size:9px;text-transform:uppercase;color:var(--muted);letter-spacing:.3px;margin-bottom:5px}
+  .circrow{margin-bottom:5px}.circrow input{width:100%}
+  .mini{font-size:11px;background:transparent;border:0;color:var(--muted);cursor:pointer}
+  .addbtn{font-size:12px;margin:4px 0}
+  .del{color:#e5777a;border-color:#5a2b2e}
+  .hint{font-size:11.5px;color:var(--muted);background:#131a22;border:1px dashed var(--line);border-radius:8px;padding:11px 13px;margin-bottom:14px;line-height:1.5}
+  code{background:#0d1218;padding:1px 5px;border-radius:4px}
+  .ovl{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
+  .ovl.show{display:flex}
+  .lmodal{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:100%;max-width:1040px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+  .lhead{display:flex;gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .lhead b{font-size:15px}.lhead .sub{font-size:12px;color:var(--muted)}
+  .lbody{overflow:auto;padding:10px 14px}
+  .lrow{display:grid;grid-template-columns:1fr 56px 16px 1fr 56px 120px 74px 60px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px}
+  .lrow.head{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line)}
+  .lrow select,.lrow input{width:100%}
+  .tag{font-size:10px;border-radius:5px;padding:1px 6px;border:1px solid}
+  .tag.auto{color:#9aa7b4;border-color:var(--line)}.tag.manual{color:#7ee06a;border-color:#2e5226}.tag.dis{color:#e5777a;border-color:#5a2b2e}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚙ Harness Builder</h1><span style="font-size:12px;color:var(--muted)">configuration → saved for the diagram</span>
+  <span id="saveStat" style="font-size:12px;color:#9aa7b4;margin-left:6px"></span>
+  <div class="spacer"></div>
+  <a class="btn" href="Harness Diagram.html">▦ Diagram</a>
+  <a class="btn" href="Connector Library.html">🧰 Connector Library</a>
+  <button id="linksBtn">🔗 Edit links</button>
+  <button id="exportBtn">📤 Export JSON</button>
+  <button id="importBtn">📥 Import JSON</button>
+  <button id="resetBtn" class="del">↺ Reset to example</button>
+</header>
+<div class="wrap">
+  <div class="hint">Build your bench here: add <b>harnesses</b> → <b>connectors</b> (mark each <b>P</b> = mates another harness, or <b>J</b> = goes to a sensor/actuator) → <b>circuits</b> (colour + circuit + AWG &amp; mm² + signal + pin). For <b>J</b> connectors, fill the sensor/actuator name, description and photo. Everything is saved automatically and shown in the Diagram (drag boxes there; click a connector for the popup). Use <b>Export JSON</b> to reuse this whole setup for another engine/controller. Connector photos can also be dropped into <code>harness_connectors/</code> — but uploading here embeds them in the JSON so they travel with the file.</div>
+  <div class="cfgbar">
+    <div><label class="l">Configuration name</label><input id="cfgName" style="width:280px"></div>
+    <div class="grow"><label class="l">Note</label><input id="cfgNote" style="width:100%"></div>
+  </div>
+  <div class="cfgbar" style="margin-top:-6px">
+    <div class="grow"><label class="l">🔎 Filter — harness · connector · part # · circuit · signal · sensor/actuator</label>
+      <input id="filter" placeholder="type to filter… e.g. J1939, P417, 0818, DEF pump, BLK3216" style="width:100%"></div>
+    <div><label class="l">&nbsp;</label><button id="clearFilter">clear</button></div>
+    <div id="filterCount" style="align-self:center;color:var(--muted);font-size:12px;min-width:130px"></div>
+  </div>
+  <div id="harnesses"></div>
+  <button id="addH" class="addbtn">+ add harness</button>
+  <button id="addE" class="addbtn">+ add ECU / controller</button>
+  <button id="addD" class="addbtn">+ add sensor / actuator</button>
+</div>
+
+<div class="ovl" id="linksov"><div class="lmodal">
+  <div class="lhead"><b>🔗 Connection links</b><span class="sub" id="linksSub"></span>
+    <div class="spacer" style="flex:1"></div>
+    <input id="linkFilter" placeholder="filter…" style="width:180px">
+    <button id="addLink">+ add manual link</button>
+    <button id="linksClose">✕ close</button></div>
+  <div class="lbody" id="linksBody"></div>
+</div></div>
+<datalist id="awgList"><option>22<option>20<option>18<option>16<option>14<option>12<option>10<option>8</datalist>
+<datalist id="mmList"><option>0.35<option>0.5<option>0.75<option>0.8<option>1.0<option>1.5<option>2.0<option>2.5<option>3.0<option>4.0<option>5.0<option>6.0</datalist>
+<datalist id="colList"><option>WHT<option>BLK<option>RED<option>YEL<option>BLU<option>GRN<option>GRA<option>ORN<option>BRN<option>PUR<option>PNK<option>TAN</datalist>
+<input type="file" id="imgPick" accept="image/*" style="display:none">
+<input type="file" id="jsonPick" accept="application/json,.json" style="display:none">
+<script src="harness_config.js"></script>
+<script>
+let M=hcNormalize(hcLoad());
+let FILTER="";
+const $=id=>document.getElementById(id);
+let _warned=false;
+function save(){if(HC_isServer()){hcSaveAsync(M);return;}if(!hcSave(M)&&!_warned){_warned=true;alert("Couldn't save to the browser — storage is full (usually from large images). Use Export JSON to keep your work; photos are auto-shrunk on upload to help.");}}
+window.__hcStatus=s=>{const el=document.getElementById("saveStat");if(el)el.textContent=({dirty:"● editing…",saving:"saving…",saved:"✓ saved on server",error:"⚠ save error",offline:"offline (this browser only)",conflict:"⚠ conflict — reload"})[s]||"";};
+const inc=s=>String(s==null?"":s).toLowerCase().includes(FILTER);
+function circMatch(z){return !!FILTER&&(inc(z.color+z.circuit)||inc(z.circuit)||inc(z.signal)||inc(z.pin)||inc(z.desc)||inc(z.color)||inc(z.awg)||inc(z.mm2));}
+function connMatch(c){if(!FILTER)return true;
+  if(inc(c.ref)||inc(c.partNumber)||inc(c.type)||inc(c.family))return true;
+  if(c.device&&(inc(c.device.name)||inc(c.device.description)||inc(c.device.partNumber)||inc(c.device.kind)))return true;
+  return (c.circuits||[]).some(circMatch);}
+function harnHeader(h){return inc(h.name)||inc(h.drawing)||inc(h.kind);}
+function harnMatch(h){if(!FILTER)return true;return harnHeader(h)||h.connectors.some(connMatch);}
+function H(hid){return M.harnesses.find(h=>h.id===hid);}
+function C(hid,cid){return H(hid).connectors.find(c=>c.id===cid);}
+function esc(s){return String(s==null?"":s).replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+
+function docOptions(c){
+  const docs=M.connectorDocs||[];
+  let auto="";if(!c.docId&&c.partNumber){const d=docs.find(x=>x.partNumber&&x.partNumber.toLowerCase()===String(c.partNumber).toLowerCase());if(d)auto=" → "+d.name;}
+  let o=`<option value="">— auto${auto?":"+esc(auto):"/none"} —</option>`;
+  docs.forEach(d=>o+=`<option value="${d.id}" ${c.docId===d.id?"selected":""}>${esc(d.name)}${d.partNumber?" ("+esc(d.partNumber)+")":""}</option>`);
+  return o;
+}
+function mateOptions(selfHid,cur){
+  let o=`<option value="">— none —</option>`;
+  M.harnesses.forEach(h=>{o+=`<option value="${h.id}" ${cur===h.id?"selected":""}>${esc(h.name)} (any)</option>`;
+    h.connectors.forEach(c=>{if(h.id===selfHid)return;const v=h.id+"/"+c.id;o+=`<option value="${v}" ${cur===v?"selected":""}>${esc(h.name)} · ${esc(c.ref)}</option>`;});});
+  return o;
+}
+function render(){
+  $("cfgName").value=M.meta?.name||"";$("cfgNote").value=M.meta?.note||"";
+  const hs=M.harnesses.filter(harnMatch);
+  let shownC=0;
+  $("harnesses").innerHTML=hs.map(h=>{
+   const conns=h.connectors.filter(c=>!FILTER||harnHeader(h)||connMatch(c));shownC+=conns.length;
+   return `
+   <div class="hcard">
+     <div class="hhead">
+       <div><label class="l">Harness / module name</label><input style="width:230px" value="${esc(h.name)}" onchange="setH('${h.id}','name',this.value)"></div>
+       <div><label class="l">Drawing / part #</label><input style="width:160px" value="${esc(h.drawing)}" onchange="setH('${h.id}','drawing',this.value)"></div>
+       <div><label class="l">Kind</label><select onchange="setH('${h.id}','kind',this.value)">
+         <option value="harness" ${h.kind==='harness'?'selected':''}>harness</option>
+         <option value="ecu" ${h.kind==='ecu'?'selected':''}>ECU / controller</option>
+         <option value="sensor" ${h.kind==='sensor'?'selected':''}>sensor</option>
+         <option value="actuator" ${h.kind==='actuator'?'selected':''}>actuator</option>
+         <option value="module" ${h.kind==='module'?'selected':''}>module / other</option></select></div>
+       <div class="buschk"><span>Buses:</span>
+         ${["j","v","a"].map(b=>`<label><input type="checkbox" ${(h.buses||[]).includes(b)?"checked":""} onchange="toggleBus('${h.id}','${b}')"> ${BUSNAME[b]}</label>`).join("")}</div>
+       <div class="spacer" style="flex:1"></div>
+       <button class="del mini" onclick="delH('${h.id}')">✕ delete</button>
+     </div>
+     ${(h.kind==='sensor'||h.kind==='actuator')?devPanel(h):''}
+     <div>${conns.map(c=>connHtml(h.id,c)).join("")||'<div class="conn" style="color:var(--muted);font-size:12px">No connectors match the filter.</div>'}</div>
+     <button class="addbtn mini" style="margin:8px 13px 12px;color:var(--accent)" onclick="addConn('${h.id}')">+ add connector</button>
+   </div>`;}).join("")||'<div class="hint">No matches for “'+esc(FILTER)+'”.</div>';
+  $("filterCount").textContent=FILTER?`${hs.length} harness · ${shownC} connector match`:"";
+  // load thumbs
+  M.harnesses.forEach(h=>{setThumb(`nimg_${h.id}`,h.image);h.connectors.forEach(c=>setThumb(`th_${h.id}_${c.id}`,c.image));});
+}
+function connHtml(hid,c){
+  const isJ=c.family==="J";
+  return `<div class="conn ${c.family}">
+    <div class="crow">
+      <div class="imgcell"><div class="thumb" id="th_${hid}_${c.id}" onclick="pickImg('${hid}','${c.id}','conn')">connector<br>photo</div></div>
+      <div><label class="l">P/J code</label><input style="width:110px" value="${esc(c.ref)}" onchange="setC('${hid}','${c.id}','ref',this.value)"></div>
+      <div><label class="l">Family</label><select onchange="setFamily('${hid}','${c.id}',this.value)" title="J/P is the connector gender, not whether it's a device"><option value="P" ${!isJ?'selected':''}>P · plug</option><option value="J" ${isJ?'selected':''}>J · jack</option></select></div>
+      <div><label class="l">Part number</label><input style="width:150px;font-family:ui-monospace;color:#7ee06a" value="${esc(c.partNumber)}" onchange="setC('${hid}','${c.id}','partNumber',this.value)"></div>
+      <div class="grow"><label class="l">Type / ways</label><input style="width:100%" value="${esc(c.type)}" onchange="setC('${hid}','${c.id}','type',this.value)"></div>
+      <div class="grow"><label class="l">Connects to (other side)</label><select style="width:100%" onchange="setC('${hid}','${c.id}','mate',this.value)">${mateOptions(hid,c.mate)}</select></div>
+      <div><label class="l">📄 Doc (pins/tool/video)</label><select style="width:170px" onchange="setC('${hid}','${c.id}','docId',this.value)">${docOptions(c)}</select></div>
+      <button class="del mini" onclick="delConn('${hid}','${c.id}')">✕</button>
+    </div>
+    ${circHtml(hid,c)}
+  </div>`;
+}
+function devPanel(h){return `<div class="dev">
+   <div class="h">${esc(h.kind)} — picture &amp; description · this node <b>is</b> the ${esc(h.kind)}; its J connector pins mate the harness P connector</div>
+   <div class="crow">
+     <div class="imgcell"><div class="thumb" id="nimg_${h.id}" onclick="pickNodeImg('${h.id}')">${esc(h.kind)}<br>photo</div></div>
+     <div class="grow"><label class="l">Description</label><input style="width:100%" value="${esc(h.description)}" onchange="setH('${h.id}','description',this.value)"></div>
+   </div></div>`;}
+function circHtml(hid,c){const cs=c.circuits||[];
+  return `<div class="circwrap">
+    <div class="circhead"><span>Colour</span><span>Circuit #</span><span>AWG</span><span>mm²</span><span>Signal / description</span><span>Pin</span><span></span></div>
+    ${cs.map((z,j)=>`<div class="circrow" style="${circMatch(z)?'background:#23303f;border-radius:6px':''}">
+      <input list="colList" value="${esc(z.color)}" onchange="setCirc('${hid}','${c.id}',${j},'color',this.value)">
+      <input value="${esc(z.circuit)}" onchange="setCirc('${hid}','${c.id}',${j},'circuit',this.value)">
+      <input list="awgList" value="${esc(z.awg)}" onchange="setCirc('${hid}','${c.id}',${j},'awg',this.value)">
+      <input list="mmList" value="${esc(z.mm2)}" onchange="setCirc('${hid}','${c.id}',${j},'mm2',this.value)">
+      <input value="${esc(z.signal)}" onchange="setCirc('${hid}','${c.id}',${j},'signal',this.value)">
+      <input value="${esc(z.pin)}" onchange="setCirc('${hid}','${c.id}',${j},'pin',this.value)">
+      <button class="mini" onclick="delCirc('${hid}','${c.id}',${j})">✕</button></div>`).join("")}
+    <button class="addbtn mini" style="color:var(--accent)" onclick="addCirc('${hid}','${c.id}')">+ circuit</button>
+  </div>`;}
+
+/* mutations */
+function setMeta(){M.meta=M.meta||{};M.meta.name=$("cfgName").value;M.meta.note=$("cfgNote").value;save();}
+$("cfgName").addEventListener("change",setMeta);$("cfgNote").addEventListener("change",setMeta);
+function setH(hid,k,v){H(hid)[k]=v;save();}
+function toggleBus(hid,b){const h=H(hid);h.buses=h.buses||[];const i=h.buses.indexOf(b);if(i<0)h.buses.push(b);else h.buses.splice(i,1);save();}
+function setC(hid,cid,k,v){C(hid,cid)[k]=v;save();}
+function setFamily(hid,cid,v){C(hid,cid).family=v;save();render();}
+function setCirc(hid,cid,j,k,v){const z=C(hid,cid).circuits[j];z[k]=v;
+  if(k==="awg"&&v&&!z.mm2&&AWG2MM[v]){z.mm2=AWG2MM[v];}
+  if(k==="mm2"&&v&&!z.awg&&MM2AWG[v]){z.awg=MM2AWG[v];}
+  save();if(k==="awg"||k==="mm2")render();}
+function addCirc(hid,cid){C(hid,cid).circuits.push({color:"",circuit:"",awg:"",mm2:"",signal:"",pin:"",desc:""});save();render();}
+function delCirc(hid,cid,j){C(hid,cid).circuits.splice(j,1);save();render();}
+function addConn(hid){H(hid).connectors.push({id:hcNewId("c"),ref:"NEW",family:"P",partNumber:"",type:"",mate:"",image:"",device:null,circuits:[]});save();render();}
+function delConn(hid,cid){const h=H(hid);h.connectors=h.connectors.filter(c=>c.id!==cid);save();render();}
+function addH(){const n=M.harnesses.length;M.harnesses.push({id:hcNewId("h"),name:"New Harness",drawing:"",kind:"harness",buses:[],box:{x:40+(n%5)*230,y:560+Math.floor(n/5)*150,w:200,h:120},connectors:[]});save();render();}
+function addE(){const n=M.harnesses.length;M.harnesses.push({id:hcNewId("ecu"),name:"New ECU / Controller",drawing:"",kind:"ecu",buses:["j"],description:"",image:"",box:{x:40+(n%5)*230,y:560+Math.floor(n/5)*150,w:210,h:96},connectors:[{id:hcNewId("c"),ref:"J1",family:"J",partNumber:"",type:"controller connector",mate:"",image:"",circuits:[]}]});save();render();}
+function addDev(){const n=M.harnesses.length;M.harnesses.push({id:hcNewId("dev"),name:"New Sensor / Actuator",drawing:"",kind:"sensor",buses:[],description:"",image:"",box:{x:40+(n%5)*230,y:560+Math.floor(n/5)*150,w:190,h:92},connectors:[{id:hcNewId("c"),ref:"J1",family:"J",partNumber:"",type:"device connector",mate:"",image:"",circuits:[]}]});save();render();}
+function pickNodeImg(hid){imgT={hid,which:"node"};$("imgPick").click();}
+function delH(hid){if(!confirm("Delete this harness?"))return;M.harnesses=M.harnesses.filter(h=>h.id!==hid);save();render();}
+
+/* images */
+let imgT=null;
+function pickImg(hid,cid,which){imgT={hid,cid,which};$("imgPick").click();}
+$("imgPick").addEventListener("change",function(){const f=this.files[0];if(!f||!imgT)return;const r=new FileReader();
+  r.onload=()=>{hcCompressImage(r.result,640,0.72,out=>{if(imgT.which==="node"){H(imgT.hid).image=out;}else{C(imgT.hid,imgT.cid).image=out;}save();render();});};
+  r.readAsDataURL(f);this.value="";});
+function setThumb(id,src){const el=$(id);if(!el||!src)return;const s=src.startsWith("data:")?src:("harness_connectors/"+src);
+  const im=new Image();im.onload=()=>{el.style.backgroundImage=`url('${s}')`;el.classList.add("has");el.textContent="";};im.src=s;}
+
+/* toolbar */
+$("addH").onclick=addH;
+$("addE").onclick=addE;
+$("addD").onclick=addDev;
+$("filter").addEventListener("input",function(){FILTER=this.value.trim().toLowerCase();render();});
+$("clearFilter").onclick=()=>{FILTER="";$("filter").value="";render();};
+$("resetBtn").onclick=()=>{if(confirm("Reset to the example configuration? Your changes will be lost.")){M=hcNormalize(HC_DEFAULT());save();render();}};
+$("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(M,null,2)],{type:"application/json"});const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=((M.meta&&M.meta.name)||"harness_config").replace(/[^a-z0-9]+/gi,"_")+".json";a.click();};
+$("importBtn").onclick=()=>$("jsonPick").click();
+$("jsonPick").addEventListener("change",function(){const f=this.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{M=hcNormalize(JSON.parse(r.result));save();render();}catch(e){alert("Invalid JSON: "+e.message);}};r.readAsText(f);this.value="";});
+/* ---- links editor ---- */
+let LFILTER="";
+function lconn(connId){const i=hcConnIndex(M)[connId];return i?esc(i.node+" · "+i.ref):esc(connId||"—");}
+function connOptions(sel){let o=`<option value="">—</option>`;M.harnesses.forEach(h=>h.connectors.forEach(c=>{o+=`<option value="${c.id}" ${sel===c.id?"selected":""}>${esc(h.name)} · ${esc(c.ref)}</option>`;}));return o;}
+function openLinks(){$("linksov").classList.add("show");renderLinks();}
+function renderLinks(){
+  const eff=hcEffectiveLinks(M);const idx=hcConnIndex(M);
+  const match=l=>{if(!LFILTER)return true;const A=idx[l.a.connId],B=idx[l.b.connId];return (((A?A.ref+A.node:"")+(B?B.ref+B.node:"")+(l.wireId||"")+l.a.pin+l.b.pin).toLowerCase().includes(LFILTER));};
+  const shown=eff.filter(match);
+  const sk=l=>{const A=idx[l.a.connId]||{},B=idx[l.b.connId]||{};return (A.node||"")+"|"+(A.ref||"")+"|"+String(l.a.pin).padStart(4,"0")+"|"+(B.node||"")+"|"+(B.ref||"")+"|"+String(l.b.pin).padStart(4,"0");};
+  shown.sort((x,y)=>sk(x)<sk(y)?-1:1);
+  let h=`<div class="lrow head"><div>from connector</div><div>pin</div><div></div><div>to connector</div><div>pin</div><div>wire id</div><div>type</div><div></div></div>`;
+  h+=shown.map(l=>{const oa=JSON.stringify({a:l.a,b:l.b,wireId:l.wireId}).replace(/"/g,"&quot;");
+    const ch=f=>l.auto?`repoint(JSON.parse('${oa}'),'${f}',this.value)`:`setLink('${l.id}','${f}',this.value)`;
+    const act=l.auto?`<button class="mini del" title="remove this auto link" onclick="disableAuto(JSON.parse('${JSON.stringify({a:l.a,b:l.b}).replace(/"/g,"&quot;")}'))">✕</button>`:`<button class="mini del" title="delete manual link" onclick="delLink('${l.id}')">✕</button>`;
+    return `<div class="lrow">
+      <div><select onchange="${ch('a.connId')}">${connOptions(l.a.connId)}</select></div>
+      <div><input value="${esc(l.a.pin)}" onchange="${ch('a.pin')}"></div><div>→</div>
+      <div><select onchange="${ch('b.connId')}">${connOptions(l.b.connId)}</select></div>
+      <div><input value="${esc(l.b.pin)}" onchange="${ch('b.pin')}"></div>
+      <div><input class="pn" value="${esc(l.wireId)}" onchange="${ch('wireId')}"></div>
+      <div><span class="tag ${l.auto?'auto':'manual'}" title="${l.auto?'editing repoints it (becomes a saved manual link)':'manual link'}">${l.auto?'auto':'manual'}</span></div>
+      <div>${act}</div></div>`;}).join("");
+  if((M.linksDisabled||[]).length){const parse=s=>{const i=s.lastIndexOf("#");return lconn(s.slice(0,i))+" · "+esc(s.slice(i+1));};
+    h+=`<div style="margin:12px 0 4px;font-size:10px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted)">removed auto-links</div>`+
+    M.linksDisabled.map((k,ix)=>{const p=k.split("||");return `<div class="lrow" style="opacity:.75"><div>${parse(p[0]||"")}</div><div></div><div>↮</div><div>${parse(p[1]||"")}</div><div></div><div></div><div><span class="tag dis">removed</span></div><div><button class="mini" onclick="restoreAuto(${ix})">restore</button></div></div>`;}).join("");}
+  $("linksBody").innerHTML=h;
+  $("linksSub").textContent=`${eff.length} effective · ${(M.links||[]).length} manual · ${(M.linksDisabled||[]).length} removed — saved in the JSON`;
+}
+function applyField(l,field,val){const seg=field.split(".");if(seg.length===2){l[seg[0]]=l[seg[0]]||{};l[seg[0]][seg[1]]=val;}else l[field]=val;}
+function disableAuto(l){const k=hcLinkKey(l);if(!M.linksDisabled.includes(k))M.linksDisabled.push(k);save();renderLinks();}
+function repoint(orig,field,val){const k=hcLinkKey(orig);if(!M.linksDisabled.includes(k))M.linksDisabled.push(k);
+  const nl={id:hcNewId("lnk"),a:{connId:orig.a.connId,pin:String(orig.a.pin)},b:{connId:orig.b.connId,pin:String(orig.b.pin)},wireId:orig.wireId||"",note:""};
+  applyField(nl,field,val);M.links.push(nl);save();renderLinks();}
+function addLink(){M.links.push({id:hcNewId("lnk"),a:{connId:"",pin:""},b:{connId:"",pin:""},wireId:"",note:""});save();renderLinks();}
+function setLink(id,field,val){const l=(M.links||[]).find(x=>x.id===id);if(!l)return;applyField(l,field,val);save();renderLinks();}
+function delLink(id){M.links=(M.links||[]).filter(x=>x.id!==id);save();renderLinks();}
+function restoreAuto(ix){M.linksDisabled.splice(ix,1);save();renderLinks();}
+$("linksBtn").onclick=openLinks;
+$("linksClose").onclick=()=>$("linksov").classList.remove("show");
+$("addLink").onclick=addLink;
+$("linkFilter").addEventListener("input",function(){LFILTER=this.value.trim().toLowerCase();renderLinks();});
+
+render();
+(async()=>{ if(HC_isServer()){ try{ M=await hcLoadAsync(); render(); }catch(e){} } })();
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connector Library — pins, tooling &amp; docs</title>
+<style>
+  :root{--bg:#0e1116;--panel:#161b22;--panel2:#1c232d;--line:#2b3340;--txt:#e6edf3;--muted:#9aa7b4;--accent:#4aa3ff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{display:flex;align-items:center;gap:10px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:5}
+  header h1{font-size:16px;margin:0;font-weight:650}.spacer{flex:1}
+  a.btn,button{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;text-decoration:none}
+  a.btn:hover,button:hover{border-color:var(--accent)}
+  .wrap{max-width:1080px;margin:0 auto;padding:16px}
+  input,textarea{background:#0d1218;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 7px;font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  label.l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin:0 0 2px}
+  .bar{display:flex;gap:10px;align-items:end;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px;flex-wrap:wrap}
+  .grow{flex:1;min-width:120px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden}
+  .chead{display:flex;gap:10px;align-items:end;flex-wrap:wrap;padding:11px 13px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .body{padding:12px 13px;display:flex;gap:14px;flex-wrap:wrap}
+  .col{flex:1;min-width:280px}
+  .thumb{width:120px;height:90px;border:1px dashed var(--line);border-radius:8px;background:#0d1218 center/cover no-repeat;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--muted);text-align:center}
+  .thumb.has{border-style:solid}
+  .sub{background:#10161d;border:1px solid var(--line);border-radius:9px;padding:9px;margin-top:10px}
+  .sub .h{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:6px}
+  .trow{display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap}
+  .trow input{flex:1;min-width:80px}
+  .toolrow{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+  .toolthumb{width:46px;height:36px;border:1px dashed var(--line);border-radius:6px;background:#0d1218 center/cover no-repeat;cursor:pointer;font-size:8px;color:var(--muted);display:flex;align-items:center;justify-content:center;text-align:center}
+  .mini{font-size:11px;background:transparent;border:0;color:var(--muted);cursor:pointer}
+  .del{color:#e5777a;border-color:#5a2b2e}
+  .addbtn{font-size:12px;margin:4px 0}
+  .vid{display:flex;gap:8px;align-items:center;margin-top:8px}
+  .vid a{color:var(--accent);font-size:12px}
+  .hint{font-size:11.5px;color:var(--muted);background:#131a22;border:1px dashed var(--line);border-radius:8px;padding:11px 13px;margin-bottom:14px;line-height:1.5}
+  .pn{font-family:ui-monospace,Menlo,monospace;color:#7ee06a}
+  .fam{font-size:10px;border-radius:6px;padding:1px 7px;border:1px solid;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧰 Connector Library</h1><span style="font-size:12px;color:var(--muted)">pins · assembly tool · video — attach to connectors in the Builder</span>
+  <span id="saveStat" style="font-size:12px;color:#9aa7b4;margin-left:6px"></span>
+  <div class="spacer"></div>
+  <a class="btn" href="Harness Builder.html">⚙ Builder</a>
+  <a class="btn" href="Harness Diagram.html">▦ Diagram</a>
+  <button id="exportBtn">📤 Export JSON</button>
+  <button id="importBtn">📥 Import JSON</button>
+</header>
+<div class="wrap">
+  <div class="hint">Document each connector once: its <b>part number</b> (used to auto-match connectors), a <b>photo</b>, the <b>terminals/pins</b> it uses, the <b>tool(s)</b> to assemble it, build <b>notes</b>, and a <b>video link</b>. In the Builder, open a connector's <b>Doc</b> dropdown to attach an entry (or it auto-matches by identical part number). The attached doc then shows in the Diagram popup.</div>
+  <div class="bar">
+    <div class="grow"><label class="l">🔎 Filter (name · part # · tool · terminal)</label><input id="filter" placeholder="type to filter…" style="width:100%"></div>
+    <div id="count" style="align-self:center;color:var(--muted);font-size:12px;min-width:90px"></div>
+  </div>
+  <div id="docs"></div>
+  <button id="addDoc" class="addbtn">+ add connector document</button>
+</div>
+<input type="file" id="imgPick" accept="image/*" style="display:none">
+<input type="file" id="jsonPick" accept="application/json,.json" style="display:none">
+<script src="harness_config.js"></script>
+<script>
+let M=hcNormalize(hcLoad());let FILTER="";
+const $=id=>document.getElementById(id);
+let _warned=false;
+function save(){if(HC_isServer()){hcSaveAsync(M);return;}if(!hcSave(M)&&!_warned){_warned=true;alert("Couldn't save to the browser — storage is full (usually from large images). Use Export JSON to keep your work; photos are auto-shrunk on upload to help.");}}
+window.__hcStatus=s=>{const el=document.getElementById("saveStat");if(el)el.textContent=({dirty:"● editing…",saving:"saving…",saved:"✓ saved on server",error:"⚠ save error",offline:"offline (this browser only)",conflict:"⚠ conflict — reload"})[s]||"";};
+function D(id){return M.connectorDocs.find(d=>d.id===id);}
+function esc(s){return String(s==null?"":s).replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+const inc=s=>String(s==null?"":s).toLowerCase().includes(FILTER);
+function docMatch(d){if(!FILTER)return true;
+  if(inc(d.name)||inc(d.partNumber)||inc(d.family)||inc(d.notes))return true;
+  if((d.tools||[]).some(t=>inc(t.name)||inc(t.partNumber)))return true;
+  return (d.terminals||[]).some(t=>inc(t.role)||inc(t.terminalPN)||inc(t.wire)||inc(t.sealPN));}
+
+function render(){
+  const ds=M.connectorDocs.filter(docMatch);
+  $("count").textContent=FILTER?ds.length+" / "+M.connectorDocs.length:M.connectorDocs.length+" entries";
+  $("docs").innerHTML=ds.map(d=>`
+   <div class="card">
+     <div class="chead">
+       <div class="grow"><label class="l">Connector name</label><input style="width:100%" value="${esc(d.name)}" onchange="setD('${d.id}','name',this.value)"></div>
+       <div><label class="l">Part number (match key)</label><input class="pn" style="width:170px" value="${esc(d.partNumber)}" onchange="setD('${d.id}','partNumber',this.value)"></div>
+       <div><label class="l">Family</label><select onchange="setD('${d.id}','family',this.value)" style="background:#0d1218;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 7px">
+         <option value="" ${d.family===''?'selected':''}>either</option><option value="P" ${d.family==='P'?'selected':''}>P · plug</option><option value="J" ${d.family==='J'?'selected':''}>J · jack</option></select></div>
+       <button class="del mini" onclick="delD('${d.id}')">✕ delete</button>
+     </div>
+     <div class="body">
+       <div class="imgcell"><div class="thumb" id="img_${d.id}" onclick="pickImg('doc','${d.id}',-1)">connector<br>photo</div></div>
+       <div class="col">
+         <label class="l">Build / assembly notes</label>
+         <textarea style="width:100%;min-height:54px" onchange="setD('${d.id}','notes',this.value)">${esc(d.notes)}</textarea>
+         <div class="vid"><div class="grow"><label class="l">Video link (documentation)</label><input style="width:100%" placeholder="https://…" value="${esc(d.videoUrl)}" onchange="setD('${d.id}','videoUrl',this.value)"></div>
+           ${d.videoUrl?`<a href="${esc(d.videoUrl)}" target="_blank" rel="noopener">▶ open</a>`:''}</div>
+         <div class="sub"><div class="h">Tools to make this connector</div>
+           ${(d.tools||[]).map((t,j)=>`<div class="toolrow">
+             <div class="toolthumb" id="tool_${d.id}_${j}" onclick="pickImg('tool','${d.id}',${j})">tool</div>
+             <input placeholder="tool name" value="${esc(t.name)}" onchange="setTool('${d.id}',${j},'name',this.value)">
+             <input class="pn" style="max-width:140px" placeholder="tool part #" value="${esc(t.partNumber)}" onchange="setTool('${d.id}',${j},'partNumber',this.value)">
+             <input style="max-width:150px" placeholder="link (optional)" value="${esc(t.link)}" onchange="setTool('${d.id}',${j},'link',this.value)">
+             <button class="mini" onclick="delTool('${d.id}',${j})">✕</button></div>`).join("")}
+           <button class="mini addbtn" style="color:var(--accent)" onclick="addTool('${d.id}')">+ tool</button></div>
+       </div>
+       <div class="col">
+         <div class="sub"><div class="h">Terminals / pins used</div>
+           ${(d.terminals||[]).map((t,j)=>`<div class="trow">
+             <input style="max-width:80px" placeholder="role/pin" value="${esc(t.role)}" onchange="setTerm('${d.id}',${j},'role',this.value)">
+             <input class="pn" placeholder="terminal part #" value="${esc(t.terminalPN)}" onchange="setTerm('${d.id}',${j},'terminalPN',this.value)">
+             <input style="max-width:120px" placeholder="wire AWG/mm²" value="${esc(t.wire)}" onchange="setTerm('${d.id}',${j},'wire',this.value)">
+             <input class="pn" style="max-width:120px" placeholder="seal part #" value="${esc(t.sealPN)}" onchange="setTerm('${d.id}',${j},'sealPN',this.value)">
+             <input placeholder="notes" value="${esc(t.notes)}" onchange="setTerm('${d.id}',${j},'notes',this.value)">
+             <button class="mini" onclick="delTerm('${d.id}',${j})">✕</button></div>`).join("")}
+           <button class="mini addbtn" style="color:var(--accent)" onclick="addTerm('${d.id}')">+ terminal</button></div>
+       </div>
+     </div>
+   </div>`).join("")||`<div class="hint">No documents${FILTER?' match “'+esc(FILTER)+'”':''}. Click “+ add connector document”.</div>`;
+  // thumbs
+  M.connectorDocs.forEach(d=>{setThumb(`img_${d.id}`,d.image);(d.tools||[]).forEach((t,j)=>setThumb(`tool_${d.id}_${j}`,t.image));});
+}
+function setThumb(id,src){const el=$(id);if(!el||!src)return;const s=src.startsWith("data:")?src:("harness_connectors/"+src);
+  const im=new Image();im.onload=()=>{el.style.backgroundImage=`url('${s}')`;el.classList.add("has");el.textContent="";};im.src=s;}
+
+function setD(id,k,v){D(id)[k]=v;save();if(k==='videoUrl')render();}
+function addDoc(){M.connectorDocs.unshift({id:hcNewId("doc"),partNumber:"",name:"New connector",family:"",image:"",videoUrl:"",notes:"",tools:[],terminals:[]});save();render();}
+function delD(id){if(!confirm("Delete this document?"))return;M.connectorDocs=M.connectorDocs.filter(d=>d.id!==id);save();render();}
+function addTool(id){D(id).tools.push({name:"",partNumber:"",image:"",link:""});save();render();}
+function setTool(id,j,k,v){D(id).tools[j][k]=v;save();}
+function delTool(id,j){D(id).tools.splice(j,1);save();render();}
+function addTerm(id){D(id).terminals.push({role:"",terminalPN:"",wire:"",sealPN:"",notes:""});save();render();}
+function setTerm(id,j,k,v){D(id).terminals[j][k]=v;save();}
+function delTerm(id,j){D(id).terminals.splice(j,1);save();render();}
+
+let imgT=null;
+function pickImg(which,id,j){imgT={which,id,j};$("imgPick").click();}
+$("imgPick").addEventListener("change",function(){const f=this.files[0];if(!f||!imgT)return;const r=new FileReader();
+  r.onload=()=>{hcCompressImage(r.result,720,0.72,out=>{if(imgT.which==="tool"){D(imgT.id).tools[imgT.j].image=out;}else{D(imgT.id).image=out;}save();render();});};
+  r.readAsDataURL(f);this.value="";});
+
+$("addDoc").onclick=addDoc;
+$("filter").addEventListener("input",function(){FILTER=this.value.trim().toLowerCase();render();});
+$("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(M,null,2)],{type:"application/json"});const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=((M.meta&&M.meta.name)||"harness_config").replace(/[^a-z0-9]+/gi,"_")+".json";a.click();};
+$("importBtn").onclick=()=>$("jsonPick").click();
+$("jsonPick").addEventListener("change",function(){const f=this.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{M=hcNormalize(JSON.parse(r.result));save();render();}catch(e){alert("Invalid JSON: "+e.message);}};r.readAsText(f);this.value="";});
+render();
+(async()=>{ if(HC_isServer()){ try{ M=await hcLoadAsync(); render(); }catch(e){} } })();
+</script>
+</body>
+</html>

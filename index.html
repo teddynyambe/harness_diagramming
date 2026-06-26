@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Bench</title>
+<style>
+  body{margin:0;background:#0e1116;color:#e6edf3;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center}
+  .wrap{max-width:760px;padding:24px}
+  h1{font-size:20px;margin:0 0 4px}.sub{color:#9aa7b4;font-size:13px;margin-bottom:22px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  a.card{display:block;text-decoration:none;color:inherit;background:#161b22;border:1px solid #2b3340;border-radius:12px;padding:16px 18px}
+  a.card:hover{border-color:#4aa3ff}
+  .card .t{font-weight:650;font-size:15px}.card .d{color:#9aa7b4;font-size:12px;margin-top:4px;line-height:1.5}
+  .stat{margin-top:20px;font-size:12px;color:#9aa7b4}
+  .ok{color:#3fb950}.bad{color:#e5777a}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔌 Harness Bench</h1>
+  <div class="sub">PACCAR + Cummins · config persisted on the server</div>
+  <div class="grid">
+    <a class="card" href="Harness Diagram.html"><div class="t">▦ Harness Diagram</div><div class="d">View topology, double-click a harness for its wiring map, inspect connectors.</div></a>
+    <a class="card" href="Harness Builder.html"><div class="t">⚙ Harness Builder</div><div class="d">Add harnesses, ECUs, sensors, connectors, circuits & links.</div></a>
+    <a class="card" href="Connector Library.html"><div class="t">🧰 Connector Library</div><div class="d">Document pins, assembly tools & videos; attach to connectors.</div></a>
+    <a class="card" href="Truck Schematic Explorer.html"><div class="t">📑 Schematic Explorer</div><div class="d">The enhanced/redrawn source schematics with parts & benchtest notes.</div></a>
+  </div>
+  <div class="stat" id="stat">checking server…</div>
+</div>
+<script>
+fetch("/api/health").then(r=>r.json()).then(d=>{
+  document.getElementById("stat").innerHTML = d.ok
+    ? '<span class="ok">● server connected</span> · v'+d.version+(d.auth_disabled?' · auth: open':' · auth: on')
+    : '<span class="bad">server responded oddly</span>';
+}).catch(()=>{document.getElementById("stat").innerHTML='<span class="bad">● offline mode</span> — opened as a file or server down; data saves to this browser only.';});
+</script>
+</body>
+</html>

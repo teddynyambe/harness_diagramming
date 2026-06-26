@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Diagram — Bench Topology</title>
+<style>
+  :root{--bg:#0e1116;--panel:#161b22;--panel2:#1c232d;--line:#2b3340;--txt:#e6edf3;--muted:#9aa7b4;--accent:#4aa3ff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:16px;margin:0;font-weight:650}.sub{font-size:12px;color:var(--muted)}.spacer{flex:1}
+  a.btn,button{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;text-decoration:none}
+  a.btn:hover,button:hover{border-color:var(--accent)}
+  .legend{max-width:1300px;margin:10px auto 0;padding:0 16px;display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .chip{display:inline-flex;align-items:center;gap:6px}.dot{width:12px;height:12px;border-radius:50%}
+  .d-j{background:#3fb950}.d-v{background:#4aa3ff}.d-a{background:#ffb454}
+  .stagewrap{max-width:1300px;margin:10px auto;padding:0 16px}
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:14px}
+  #svgbox{overflow:auto;max-height:72vh;border-radius:14px 14px 0 0}
+  #svg{display:block;width:100%;height:auto;touch-action:none}
+  .stagefoot{display:flex;align-items:center;gap:14px;padding:7px 10px;border-top:1px solid var(--line)}
+  .stagefoot .hint{margin:0}
+  .zoombar{display:flex;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:4px}
+  .zoombar button{min-width:34px;padding:4px 9px;font-size:15px;line-height:1}
+  .zoombar .z{align-self:center;font-size:11px;color:var(--muted);min-width:38px;text-align:center}
+  .port rect{transition:fill .1s}.port:hover rect{fill:#4aa3ff}
+  .boxdrag{cursor:grab}
+  .hint{font-size:11.5px;color:var(--muted);margin:8px 2px}
+  /* modal */
+  .ov{position:fixed;inset:0;display:none;z-index:50;pointer-events:none}
+  .ov.show{display:block}
+  .modal{position:fixed;left:40px;top:80px;background:var(--panel);border:1px solid var(--accent);border-radius:14px;width:560px;max-width:92vw;max-height:86vh;overflow:auto;box-shadow:0 24px 64px #000b;pointer-events:auto}
+  .mh{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);cursor:move;user-select:none}
+  .mh .t{font-weight:700;font-size:15px}.mh .s{font-size:12px;color:var(--muted);margin-top:2px}
+  .fam{font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;border:1px solid}
+  .fam.P{color:#4aa3ff;border-color:#274055}.fam.J{color:#ffb454;border-color:#5a4422}
+  .mb{padding:14px 16px}
+  .mimg{width:100%;max-height:230px;object-fit:contain;background:#0d1218;border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
+  .dev{background:#15211a;border:1px solid #2e5226;border-radius:10px;padding:12px;margin-bottom:12px}
+  .dev .k{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#7ee06a}
+  .dev .n{font-weight:700;font-size:14px;margin:2px 0}.dev .d{font-size:12.5px;color:#c9d4df;line-height:1.5}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
+  .sw{display:inline-block;width:11px;height:11px;border-radius:2px;border:1px solid #0006;margin-right:5px;vertical-align:-1px}
+  .wire{font-family:ui-monospace,Menlo,monospace}
+  .x{margin-left:auto;background:transparent;border:0;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+  .empty{color:var(--muted);font-size:12px}
+  .wireov{position:fixed;inset:0;background:#0b0e13;display:none;flex-direction:column;z-index:60}
+  .wireov.show{display:flex}
+  .wirehead{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .wirehead .t{font-weight:700;font-size:15px}.wirehead .s{font-size:12px;color:var(--muted)}
+  .wirebody{flex:1;overflow:auto;background-image:radial-gradient(circle,#161b22 1px,transparent 1px);background-size:22px 22px}
+  #wireSvg{display:block}.wbox{cursor:grab}
+  @media print{header,.legend,.hint,#importBtn,#reloadBtn,.toolbtns{display:none!important}.stage{border-color:#bbb}#svg text{fill:#000!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔌 Harness Diagram</h1><span class="sub">drag boxes to arrange · click a connector for details</span>
+  <span id="saveStat" style="font-size:12px;color:#9aa7b4;margin-left:6px"></span>
+  <div class="spacer"></div>
+  <span class="toolbtns">
+  <a class="btn" href="Harness Builder.html">⚙ Builder</a>
+  <a class="btn" href="Connector Library.html">🧰 Library</a>
+  <button id="reloadBtn">↻ Reload config</button>
+  <button id="importBtn">📥 Import JSON</button>
+  <button id="printBtn">🖨 Print</button>
+  </span>
+</header>
+<div class="legend">
+  <span class="chip"><span class="dot d-j"></span>J1939</span>
+  <span class="chip"><span class="dot d-v"></span>V-CAN</span>
+  <span class="chip"><span class="dot d-a"></span>A-CAN</span>
+  <span class="chip">▭ port = connector · badge = circuit count · <b style="color:#4aa3ff">P</b> pins · <b style="color:#ffb454">J</b> device · <span style="color:#a26bd6">⬚ dashed = inter-harness connector</span> · <b>double-click a harness</b> for its wiring map</span>
+  <span class="chip" style="margin-left:auto"><label style="cursor:pointer"><input type="checkbox" id="onlyMatched" checked> only draw lines where connectors share a circuit</label></span>
+</div>
+<div class="stagewrap">
+  <div class="stage"><div id="svgbox"></div>
+    <div class="stagefoot">
+      <div class="zoombar"><button id="zoomOut" title="zoom out">−</button><span class="z" id="zoomPct">100%</span><button id="zoomIn" title="zoom in">+</button><button id="zoomFit" title="fit to content" style="font-size:12px">Fit</button></div>
+      <div class="hint" id="cfgname"></div>
+    </div>
+  </div>
+</div>
+<div class="ov" id="ov"><div class="modal" id="popModal"><div class="mh" id="mh"></div><div class="mb" id="mb"></div></div></div>
+<div class="wireov" id="wireov">
+  <div class="wirehead"><div><div class="t" id="wireTitle"></div><div class="s" id="wireSub"></div></div>
+    <div class="spacer"></div>
+    <span class="s">drag connectors, the boundary &amp; the external pins anytime · solid = internal · dashed = external</span>
+    <label class="s" style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#4aa3ff"><input type="checkbox" id="wEditChk"> ✎ link pins (click a pin then another to connect inside this harness)</label>
+    <button id="wireClose">✕ close</button></div>
+  <div class="wirebody"><div id="wireSvgBox"></div></div>
+</div>
+<input type="file" id="jsonpick" accept="application/json,.json" style="display:none">
+<script src="harness_config.js"></script>
+<script>
+let M=hcNormalize(hcLoad());
+function dsave(){ if(typeof HC_isServer==="function"&&HC_isServer()) hcSaveAsync(M); else hcSave(M); }
+window.__hcStatus=s=>{const el=document.getElementById("saveStat");if(el)el.textContent=({dirty:"● editing…",saving:"saving…",saved:"✓ saved",error:"⚠ save error",offline:"offline",conflict:"⚠ conflict — reload"})[s]||"";};
+let zoom=1, VBX=0, VBY=0, VBW=1200, VBH=700, dragging=false;
+const $=id=>document.getElementById(id);
+function resolveImg(s){if(!s)return"";return s.startsWith("data:")?s:("harness_connectors/"+s);}
+function computeVB(){const P=60;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  M.harnesses.forEach(h=>{x0=Math.min(x0,h.box.x);y0=Math.min(y0,h.box.y);x1=Math.max(x1,h.box.x+h.box.w);y1=Math.max(y1,h.box.y+h.box.h);});
+  if(x0>x1){x0=0;y0=0;x1=400;y1=300;}
+  VBX=Math.round(x0-P);VBY=Math.round(y0-P);VBW=Math.round((x1-x0)+P*2);VBH=Math.round((y1-y0)+P*2);}
+function applyZoom(){const svg=$("svg");if(!svg)return;svg.style.width=Math.round(VBW*zoom)+"px";svg.style.height=Math.round(VBH*zoom)+"px";const p=$("zoomPct");if(p)p.textContent=Math.round(zoom*100)+"%";}
+function fitView(){computeVB();const box=$("svgbox");const cw=(box?box.clientWidth:1000)-14;const ch=Math.max(240,Math.round(window.innerHeight*0.72)-16);
+  zoom=Math.max(0.1,Math.min(2.4,Math.min(cw/VBW,ch/VBH)));diagram();applyZoom();}
+let PORT={}; // hid/connId -> {x,y,side, hid, idx}
+function findConn(key){const i=key.indexOf("/");if(i<0)return null;const h=M.harnesses.find(x=>x.id===key.slice(0,i));return h?h.connectors.find(z=>z.id===key.slice(i+1)):null;}
+function circKeys(c){return new Set((c.circuits||[]).map(z=>(z.circuit||"").trim().toLowerCase()).filter(Boolean));}
+function sharedCircuit(a,b){const s=circKeys(a);for(const k of circKeys(b)){if(s.has(k))return true;}return false;}
+
+function boxes(){const o={};M.harnesses.forEach(h=>o[h.id]={...h.box,cx:h.box.x+h.box.w/2,cy:h.box.y+h.box.h/2});return o;}
+function diagram(){
+  const B=boxes();
+  const tBox=mate=>{if(!mate)return null;return B[mate.split("/")[0]]||null;};
+  const sideFor=(h,c)=>{const b=B[h.id],t=tBox(c.mate);if(!t)return"R";const dx=t.cx-b.cx,dy=t.cy-b.cy;return Math.abs(dx)>=Math.abs(dy)?(dx>0?"R":"L"):(dy>0?"B":"T");};
+  PORT={};
+  M.harnesses.forEach(h=>{const g={L:[],R:[],T:[],B:[]};h.connectors.forEach((c,i)=>g[c.side||sideFor(h,c)].push(i));
+    const b=B[h.id];Object.keys(g).forEach(s=>g[s].forEach((idx,k)=>{const f=(k+1)/(g[s].length+1);let x,y;
+      if(s==="R"){x=b.x+b.w;y=b.y+b.h*f;}else if(s==="L"){x=b.x;y=b.y+b.h*f;}else if(s==="T"){y=b.y;x=b.x+b.w*f;}else{y=b.y+b.h;x=b.x+b.w*f;}
+      PORT[h.id+"/"+h.connectors[idx].id]={x,y,side:s,hid:h.id,idx};}));});
+  const edge=(b,fx,fy)=>{const x=Math.max(b.x,Math.min(fx,b.x+b.w)),y=Math.max(b.y,Math.min(fy,b.y+b.h));
+    const dl=x-b.x,dr=b.x+b.w-x,dt=y-b.y,db=b.y+b.h-y,m=Math.min(dl,dr,dt,db);
+    if(m===dl)return{x:b.x,y};if(m===dr)return{x:b.x+b.w,y};if(m===dt)return{x,y:b.y};return{x,y:b.y+b.h};};
+  const onlyMatched=(document.getElementById("onlyMatched")||{checked:true}).checked;
+  let links="";const seen=new Set();
+  M.harnesses.forEach(h=>h.connectors.forEach((c,i)=>{if(!c.mate)return;const sk=h.id+"/"+c.id,sp=PORT[sk];if(!sp)return;
+    let dp,dk,matched=true;
+    if(c.mate.includes("/")){dk=c.mate;dp=PORT[c.mate];if(!dp)return;const tgt=findConn(c.mate);matched=!!(tgt&&sharedCircuit(c,tgt));
+      if(onlyMatched&&!matched)return;}
+    else{const bb=B[c.mate];if(!bb)return;dk=c.mate;dp=edge(bb,sp.x,sp.y);}
+    const pk=[sk,dk].sort().join("|");if(seen.has(pk))return;seen.add(pk);
+    const mx=(sp.x+dp.x)/2;
+    const col=matched?"#6b7787":"#3a4452", dash=matched?"":'stroke-dasharray="4 4"';
+    links+=`<path d="M${sp.x},${sp.y} C ${mx},${sp.y} ${mx},${dp.y} ${dp.x},${dp.y}" fill="none" stroke="${col}" stroke-width="2" ${dash}/>`;}));
+  let s=`<svg id="svg" viewBox="${VBX} ${VBY} ${VBW} ${VBH}" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica,Arial,sans-serif">`+links;
+  const KCOL={ecu:'#a26bd6',sensor:'#2bb3a3',actuator:'#e8862e',module:'#5a4422',harness:'#3a4756'};
+  const KTAG={ecu:'ECU',sensor:'SENSOR',actuator:'ACTUATOR'};
+  M.harnesses.forEach(h=>{const b=B[h.id];const k=h.kind||'harness';
+    const stroke=KCOL[k]||'#3a4756';const fill=k==='harness'?'#161b22':'#10161d';const dash=k==='module'?'stroke-dasharray="4 3"':'';
+    s+=`<g><rect class="boxdrag" data-hid="${h.id}" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="11" fill="${fill}" stroke="${stroke}" stroke-width="${k==='harness'?1:2}" ${dash}/>`;
+    if(KTAG[k])s+=`<text x="${b.x+b.w-6}" y="${b.y+14}" text-anchor="end" font-size="9" font-weight="700" fill="${stroke}" pointer-events="none">${KTAG[k]}</text>`;
+    s+=`<text x="${b.cx}" y="${b.y+25}" text-anchor="middle" font-size="15" font-weight="700" fill="#fff" pointer-events="none">${esc(h.name)}</text>`;
+    s+=`<text x="${b.cx}" y="${b.y+43}" text-anchor="middle" font-size="11.5" fill="#7e8b99" font-family="monospace" pointer-events="none">${esc(h.drawing)}</text>`;
+    (h.buses||[]).forEach((bs,k)=>s+=`<circle cx="${b.x+12+k*14}" cy="${b.y+12}" r="5" fill="${BUSCOL[bs]}" pointer-events="none"/>`);
+    s+=`</g>`;});
+  const INTER=hcInterConnectors(M);
+  M.harnesses.forEach(h=>h.connectors.forEach((c,i)=>{const p=PORT[h.id+"/"+c.id];if(!p)return;const n=(c.circuits||[]).length;
+    const col=c.family==="J"?"#ffb454":"#9aa7b4";
+    s+=`<g class="port" data-port="${h.id}/${c.id}"><title>${esc(c.ref)} (${c.family})${INTER.has(c.id)?" · inter-harness":""} — ${esc(c.partNumber||c.type)}</title>`;
+    s+=`<rect x="${p.x-6}" y="${p.y-6}" width="12" height="12" rx="2" fill="#0d1218" stroke="${col}" stroke-width="2"/>`;
+    if(INTER.has(c.id))s+=`<rect x="${p.x-9}" y="${p.y-9}" width="18" height="18" rx="4" fill="none" stroke="#a26bd6" stroke-width="1.5" stroke-dasharray="3 2" pointer-events="none"/>`;
+    let lx=p.x,ly=p.y,a="middle";if(p.side==="R"){lx+=9;a="start";}else if(p.side==="L"){lx-=9;a="end";}else if(p.side==="T"){ly-=9;}else{ly+=16;}
+    s+=`<text x="${lx}" y="${ly+3}" text-anchor="${a}" font-size="11" fill="#cdd6df" pointer-events="none">${esc(c.ref)}</text>`;
+    if(n>0)s+=`<circle cx="${p.x+7}" cy="${p.y-7}" r="7" fill="${col}"/><text x="${p.x+7}" y="${p.y-4}" text-anchor="middle" font-size="9" font-weight="700" fill="#000" pointer-events="none">${n}</text>`;
+    s+=`</g>`;}));
+  s+=`</svg>`;$("svgbox").innerHTML=s;applyZoom();
+  $("cfgname").textContent="Config: "+(M.meta&&M.meta.name?M.meta.name:"(unnamed)");
+}
+function esc(t){return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+/* ---- popup ---- */
+function openPopup(key){const i=key.indexOf("/");const hid=key.slice(0,i),cid=key.slice(i+1);const h=M.harnesses.find(x=>x.id===hid);if(!h)return;const c=h.connectors.find(z=>z.id===cid);if(!c)return;
+  $("mh").innerHTML=`<div><div class="t">${esc(c.ref)} <span class="fam ${c.family}">${c.family==="J"?"J · device":"P · plug"}</span></div>
+    <div class="s">${esc(h.name)} · ${esc(c.partNumber||"—")} · ${esc(c.type||"")}</div></div><button class="x" onclick="closeP()">×</button>`;
+  let b="";const ci=resolveImg(c.image);
+  if(ci)b+=`<img class="mimg" src="${ci}" onerror="this.style.display='none'">`;
+  const isDev=(h.kind==="sensor"||h.kind==="actuator");
+  if(isDev){const di=resolveImg(h.image);
+    b+=`<div class="dev"><div class="k">${esc(h.kind)}</div><div class="n">${esc(h.name||"")}</div>
+      ${h.drawing?`<div class="s" style="font-family:ui-monospace;color:#7ee06a">${esc(h.drawing)}</div>`:""}
+      <div class="d">${esc(h.description||"")}</div>
+      ${di?`<img class="mimg" style="margin-top:10px" src="${di}" onerror="this.style.display='none'">`:""}</div>`;}
+  const cc=c.circuits||[];
+  if(cc.length){b+=`<table><thead><tr><th>${c.family==="J"?"Pin":"Pin"}</th><th>Signal / description</th><th>Wire</th><th>AWG / mm²</th></tr></thead><tbody>`+
+    cc.map(z=>`<tr><td><b>${esc(z.pin)}</b></td><td>${esc(z.signal)}${z.desc?`<div style="color:var(--muted);font-size:10.5px">${esc(z.desc)}</div>`:""}</td>
+      <td class="wire"><span class="sw" style="background:${hcWireColor(z.color+z.circuit)}"></span>${esc(z.color)}${esc(z.circuit)}</td>
+      <td>${esc(z.awg||"—")} / ${esc(z.mm2||"—")}</td></tr>`).join("")+`</tbody></table>`;
+  }else if(!isDev){b+=`<div class="empty">No circuits added yet. Add them in the Builder.</div>`;}
+  const links=hcConnLinks(M,c.id);
+  if(links.length){b+=`<div style="margin-top:10px;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">🔗 matched connections (same wire ID)</div>`+
+    `<table><thead><tr><th>Wire ID</th><th>this pin</th><th>→ connector · pin</th><th></th></tr></thead><tbody>`+
+    links.map(l=>`<tr><td class="wire"><span class="sw" style="background:${hcWireColor(l.id)}"></span>${esc(l.id)}</td><td><b>${esc(l.fromPin)}</b></td>
+      <td>${esc(l.to.ref)} · <b>${esc(l.to.pin)}</b><div style="color:var(--muted);font-size:10px">${esc(l.to.node)}</div></td>
+      <td>${l.sameNode?'<span style="color:#3fb950">internal</span>':'<span style="color:#a26bd6">interconnect</span>'}</td></tr>`).join("")+`</tbody></table>`;}
+  const doc=hcDocFor(M,c);
+  if(doc){b+=`<div class="dev" style="background:#1a1426;border-color:#3a2b52"><div class="k" style="color:#c79be8">connector doc · ${esc(doc.name)}${doc.partNumber?" · "+esc(doc.partNumber):""}</div>`;
+    const di=resolveImg(doc.image);if(di)b+=`<img class="mimg" style="margin-top:8px" src="${di}" onerror="this.style.display='none'">`;
+    if(doc.notes)b+=`<div class="d" style="margin-top:6px">${esc(doc.notes)}</div>`;
+    if((doc.tools||[]).length){b+=`<div style="margin-top:8px;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Tools</div>`+
+      doc.tools.map(t=>`<div style="font-size:12.5px;margin-top:2px">🔧 ${esc(t.name)} ${t.partNumber?'<span class="wire">'+esc(t.partNumber)+'</span>':''} ${t.link?'<a href="'+esc(t.link)+'" target="_blank" rel="noopener" style="color:var(--accent)">link</a>':''}</div>`).join("");}
+    if((doc.terminals||[]).length){b+=`<table style="margin-top:8px"><thead><tr><th>Pin/role</th><th>Terminal P/N</th><th>Wire</th><th>Seal</th></tr></thead><tbody>`+
+      doc.terminals.map(t=>`<tr><td>${esc(t.role)}</td><td class="wire">${esc(t.terminalPN)}</td><td>${esc(t.wire)}</td><td class="wire">${esc(t.sealPN)}</td></tr>`).join("")+`</tbody></table>`;}
+    if(doc.videoUrl)b+=`<div style="margin-top:10px"><a href="${esc(doc.videoUrl)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:13px;font-weight:600">▶ documentation video</a></div>`;
+    b+=`</div>`;}
+  $("mb").innerHTML=b;$("ov").classList.add("show");placePopup();
+}
+/* ---- visual harness wiring view ---- */
+let WCTX=null, WPOS={}, wdrag=null, wmoved=false, selPin=null, wEdit=false, envOverride=null, WSTUB={}, WENV=null, WSTUBP={}, selLink=null, WLINKS=null;
+const WHEAD=44, WRH=22, WBOXW=250;
+function buildWireData(hid){const h=M.harnesses.find(x=>x.id===hid);const conns=h?h.connectors||[]:[];const idx=hcConnIndex(M);
+  const rowCount={};conns.forEach(c=>rowCount[c.id]=(c.circuits||[]).length||1);
+  const rowIndex={};conns.forEach(c=>rowIndex[c.id]=(c.circuits||[]).map((z,j)=>({j,wid:hcWireId(z),pin:String(z.pin)})));
+  const rowOf=(connId,pin)=>{const arr=rowIndex[connId];if(!arr)return null;const r=arr.find(x=>x.pin===String(pin));return r?r.j:(arr[0]?0:null);};
+  const intLines=[],extLinks=[],stubMap={};
+  hcEffectiveLinks(M).forEach(l=>{const ai=idx[l.a.connId],bi=idx[l.b.connId];if(!ai||!bi)return;
+    const aIn=ai.nodeId===hid,bIn=bi.nodeId===hid;
+    if(aIn&&bIn){const ja=rowOf(l.a.connId,l.a.pin),jb=rowOf(l.b.connId,l.b.pin);if(ja!=null&&jb!=null)intLines.push({a:{connId:l.a.connId,j:ja,pin:l.a.pin},b:{connId:l.b.connId,j:jb,pin:l.b.pin},wid:l.wireId||""});}
+    else if(aIn||bIn){const inn=aIn?l.a:l.b,out=aIn?l.b:l.a,oi=aIn?bi:ai;const ji=rowOf(inn.connId,inn.pin);if(ji==null)return;
+      const key=oi.ref+"|"+out.pin+"|"+oi.node;stubMap[key]=stubMap[key]||{key,ref:oi.ref,pin:out.pin,node:oi.node,connId:out.connId};extLinks.push({from:{connId:inn.connId,j:ji,pin:inn.pin},to:{connId:out.connId,pin:out.pin},stubKey:key,wid:l.wireId||""});}});
+  // surface ALL pins of explicitly-mated external connectors as available boundary points
+  conns.forEach(c=>{const mt=c.mate||"";if(mt.indexOf("/")<0)return;const mcid=mt.slice(mt.indexOf("/")+1);const E=idx[mcid];if(!E||E.nodeId===hid)return;
+    (E.conn.circuits||[]).forEach(z=>{if(!String(z.pin).trim())return;const key=E.ref+"|"+z.pin+"|"+E.node;if(!stubMap[key])stubMap[key]={key,ref:E.ref,pin:String(z.pin),node:E.node,connId:mcid};});});
+  // keep only numbered pins; enrich with signal + wire id from the external connector
+  const stubList=Object.values(stubMap).filter(s=>String(s.pin).trim()!=="");
+  stubList.forEach(s=>{const E=idx[s.connId];if(E&&E.conn){const z=(E.conn.circuits||[]).find(x=>String(x.pin)===String(s.pin));if(z){s.signal=z.signal||"";s.wire=(z.color||"")+(z.circuit||"");}}});
+  return {hid,conns,intLines,extLinks,stubList,rowCount};}
+function openHarnessWiring(hid){const h=M.harnesses.find(x=>x.id===hid);if(!h)return;selPin=null;selLink=null;
+  WCTX=buildWireData(hid);const conns=WCTX.conns;const INTER=hcInterConnectors(M);
+  const saved=h.wire||{};
+  WPOS=Object.assign({},saved.pos||{});envOverride=saved.env||null;WSTUB=Object.assign({},saved.stubs||{});
+  const missing=conns.filter(c=>!WPOS[c.id]);
+  if(missing.length){const interIds=missing.filter(c=>INTER.has(c.id)).map(c=>c.id);const devIds=missing.filter(c=>!INTER.has(c.id)).map(c=>c.id);
+    const place=(ids,x)=>{let y=24;ids.forEach(id=>{WPOS[id]={x,y};y+=WHEAD+WCTX.rowCount[id]*WRH+12+24;});};
+    place(devIds,40);place(interIds,360);}
+  $("wireTitle").textContent=h.name+" — internal & external wiring";
+  $("wireSub").textContent=(h.drawing||"")+" · "+WCTX.intLines.length+" internal links · "+WCTX.stubList.length+" external points";
+  $("wireov").classList.add("show");wireRender();}
+function recomputeWires(){if(!WCTX)return;WCTX=buildWireData(WCTX.hid);wireRender();}
+function saveWireLayout(){if(!WCTX)return;const h=M.harnesses.find(x=>x.id===WCTX.hid);if(!h)return;h.wire={pos:WPOS,env:envOverride,stubs:WSTUB};dsave();}
+function inferWire(ep){const i=hcConnIndex(M)[ep.connId];if(!i||!i.conn)return"";const z=(i.conn.circuits||[]).find(c=>String(c.pin)===String(ep.pin));return z?hcWireId(z):"";}
+function handlePinClick(cid,pin){pin=String(pin);
+  if(!selPin){selPin={cid,pin};wireRender();return;}
+  if(selPin.cid===cid&&selPin.pin===pin){selPin=null;wireRender();return;}
+  const A={connId:selPin.cid,pin:selPin.pin},B={connId:cid,pin};
+  const key=hcLinkKey({a:A,b:B});
+  const exist=hcEffectiveLinks(M).find(l=>hcLinkKey(l)===key);
+  if(exist){if(exist.auto){if(!M.linksDisabled.includes(key))M.linksDisabled.push(key);}else{M.links=(M.links||[]).filter(x=>x.id!==exist.id);}}
+  else{M.links.push({id:hcNewId("lnk"),a:A,b:B,wireId:inferWire(A)||inferWire(B)||"",note:""});}
+  dsave();selPin=null;recomputeWires();}
+function wstub(k){return WCTX&&WCTX.stubList.find(s=>s.key===k);}
+function wanchor(cid,j,side){const p=WPOS[cid];const y=p.y+WHEAD+j*WRH+WRH/2;return{x:side==="L"?p.x:p.x+WBOXW,y};}
+function snapPerim(env,px,py){const x=Math.max(env.x0,Math.min(px,env.x1)),y=Math.max(env.y0,Math.min(py,env.y1));const dl=x-env.x0,dr=env.x1-x,dt=y-env.y0,db=env.y1-y,m=Math.min(dl,dr,dt,db);if(m===dl)return{x:env.x0,y};if(m===dr)return{x:env.x1,y};if(m===dt)return{x,y:env.y0};return{x,y:env.y1};}
+function wireRender(){if(!WCTX)return;const {conns,intLines,extLinks,stubList,hid}=WCTX;
+  const h=M.harnesses.find(x=>x.id===hid);
+  const boxH=c=>WHEAD+Math.max(1,(c.circuits||[]).length)*WRH+12;
+  // ---- harness envelope (boundary): auto-fit unless the user dragged it ----
+  let e0x=1e9,e0y=1e9,e1x=-1e9,e1y=-1e9;
+  conns.forEach(c=>{const p=WPOS[c.id];e0x=Math.min(e0x,p.x);e0y=Math.min(e0y,p.y);e1x=Math.max(e1x,p.x+WBOXW);e1y=Math.max(e1y,p.y+boxH(c));});
+  if(e0x>e1x){e0x=20;e0y=20;e1x=320;e1y=200;}
+  const PAD=42;const autoEnv={x0:e0x-PAD,y0:e0y-PAD-16,x1:e1x+PAD,y1:e1y+PAD};
+  const env=envOverride?envOverride:autoEnv;WENV=env;
+  // ---- external points: custom position (dragged) or default on the right border ----
+  const acc={};extLinks.forEach(l=>{if(!WPOS[l.from.connId])return;const a=wanchor(l.from.connId,l.from.j,"R");(acc[l.stubKey]=acc[l.stubKey]||[]).push(a.y);});
+  const defs=stubList.map(s=>{const ys=acc[s.key]||[env.y0+30];return {key:s.key,y:Math.round(ys.reduce((p,c)=>p+c,0)/ys.length)};});
+  defs.sort((a,b)=>a.y-b.y);let prev=-1e9;defs.forEach(d=>{if(d.y<prev+32)d.y=prev+32;prev=d.y;});
+  const defY={};defs.forEach(d=>defY[d.key]=d.y);
+  WSTUBP={};stubList.forEach(s=>{const cu=WSTUB[s.key];WSTUBP[s.key]=cu?snapPerim(env,cu.x,cu.y):{x:env.x1,y:defY[s.key]};});
+  let labelW=110;stubList.forEach(s=>{const t=(s.signal||"")+" ("+(s.wire||"")+") · "+s.pin,b=(s.node||"")+" - "+(s.ref||"");labelW=Math.max(labelW,t.length,b.length);});
+  const labelPx=Math.round(labelW*6.6)+60;
+  const allX=Object.values(WSTUBP).map(p=>p.x).concat([env.x1,200]),allY=Object.values(WSTUBP).map(p=>p.y).concat([env.y1,200]);
+  const Wt=Math.max(900,Math.max.apply(null,allX)+labelPx),Ht=Math.max(480,Math.max.apply(null,allY)+40);
+  // envelope
+  let ENV=`<rect x="${env.x0}" y="${env.y0}" width="${env.x1-env.x0}" height="${env.y1-env.y0}" rx="16" fill="#0f141b" stroke="#46566a" stroke-dasharray="2 5"/>`+
+    `<text x="${env.x0+14}" y="${env.y0+20}" font-size="12" font-weight="700" fill="#6b7787">${esc(h?h.name:"harness")} — boundary${envOverride?" (custom)":""}</text>`;
+  {const hs=[["nw",env.x0,env.y0],["n",(env.x0+env.x1)/2,env.y0],["ne",env.x1,env.y0],["e",env.x1,(env.y0+env.y1)/2],["se",env.x1,env.y1],["s",(env.x0+env.x1)/2,env.y1],["sw",env.x0,env.y1],["w",env.x0,(env.y0+env.y1)/2]];
+    hs.forEach(hd=>{const cur=hd[0].length===1?(/[ns]/.test(hd[0])?"ns":"ew"):((hd[0]==="nw"||hd[0]==="se")?"nwse":"nesw");
+      ENV+=`<rect class="whandle" data-h="${hd[0]}" x="${hd[1]-5}" y="${hd[2]-5}" width="9" height="9" rx="2" fill="#46566a" stroke="#0b0e13" style="cursor:${cur}-resize"/>`;});}
+  // lines
+  const linkDraw=[];
+  intLines.forEach(l=>{const pa=WPOS[l.a.connId],pb=WPOS[l.b.connId];if(!pa||!pb)return;const aR=pb.x>=pa.x;const A=wanchor(l.a.connId,l.a.j,aR?"R":"L"),B=wanchor(l.b.connId,l.b.j,aR?"L":"R");const mx=(A.x+B.x)/2;
+    linkDraw.push({key:`int|${l.a.connId}#${l.a.j}|${l.b.connId}#${l.b.j}`,d:`M${A.x},${A.y} C ${mx},${A.y} ${mx},${B.y} ${B.x},${B.y}`,mid:{x:mx,y:(A.y+B.y)/2},color:hcWireColor(l.wid),dash:false,ends:[{connId:l.a.connId,j:l.a.j},{connId:l.b.connId,j:l.b.j}],link:{a:{connId:l.a.connId,pin:l.a.pin},b:{connId:l.b.connId,pin:l.b.pin}}});});
+  extLinks.forEach(l=>{const sp=WSTUBP[l.stubKey];if(!sp||!WPOS[l.from.connId])return;const A=wanchor(l.from.connId,l.from.j,"R");const B={x:sp.x,y:sp.y};const mx=(A.x+B.x)/2;
+    linkDraw.push({key:`ext|${l.from.connId}#${l.from.j}|${l.stubKey}`,d:`M${A.x},${A.y} C ${mx},${A.y} ${mx},${B.y} ${B.x},${B.y}`,mid:{x:mx,y:(A.y+B.y)/2},color:hcWireColor(l.wid),dash:true,ends:[{connId:l.from.connId,j:l.from.j}],stub:l.stubKey,link:{a:{connId:l.from.connId,pin:l.from.pin},b:{connId:l.to.connId,pin:l.to.pin}}});});
+  WLINKS=linkDraw;
+  let L="";
+  linkDraw.forEach(ld=>{const sel=selLink===ld.key;
+    if(sel)L+=`<path d="${ld.d}" fill="none" stroke="#ffffff" stroke-width="7" opacity="0.16" stroke-linecap="round"/>`;
+    L+=`<path d="${ld.d}" fill="none" stroke="${ld.color}" stroke-width="${sel?3.6:(ld.dash?1.7:2)}" ${ld.dash?'stroke-dasharray="5 3"':''} opacity="${sel?1:0.85}"/>`;
+    L+=`<path class="wlink" data-key="${esc(ld.key)}" d="${ld.d}" fill="none" stroke="transparent" stroke-width="16" pointer-events="stroke" style="cursor:pointer"/>`;});
+  const _sl=selLink&&linkDraw.find(x=>x.key===selLink);
+  const DEL=(_sl&&wEdit)?`<g class="wdellink" style="cursor:pointer"><title>remove this connection</title><circle cx="${_sl.mid.x}" cy="${_sl.mid.y}" r="11" fill="#e5484d" stroke="#0b0e13" stroke-width="1.5"/><text x="${_sl.mid.x}" y="${_sl.mid.y+4}" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" pointer-events="none">×</text></g>`:"";
+  // boxes
+  let BX="";
+  conns.forEach(c=>{const p=WPOS[c.id];const bh=boxH(c);const col=c.family==="J"?"#ffb454":"#4aa3ff";
+    BX+=`<g class="wbox" data-cid="${c.id}"><rect x="${p.x}" y="${p.y}" width="${WBOXW}" height="${bh}" rx="9" fill="#161b22" stroke="${col}" stroke-width="1.5"/>`+
+      `<text x="${p.x+10}" y="${p.y+19}" font-size="13" font-weight="700" fill="#fff">${esc(c.ref)}</text>`+
+      `<text x="${p.x+WBOXW-8}" y="${p.y+19}" text-anchor="end" font-size="10" font-weight="700" fill="${col}">${c.family}</text>`+
+      `<text x="${p.x+10}" y="${p.y+34}" font-size="9.5" fill="#7e8b99" font-family="monospace">${esc(c.partNumber||c.type||"")}</text>`;
+    (c.circuits||[]).forEach((z,j)=>{const y=p.y+WHEAD+j*WRH+WRH/2;const wc=hcWireColor(hcWireId(z));
+      const isSel=selPin&&selPin.cid===c.id&&selPin.pin===String(z.pin);
+      if(isSel)BX+=`<rect x="${p.x+1}" y="${y-WRH/2+1}" width="${WBOXW-2}" height="${WRH-2}" rx="3" fill="#4aa3ff22" stroke="#4aa3ff" stroke-width="2"/>`;
+      BX+=`<circle cx="${p.x}" cy="${y}" r="3" fill="${wc}"/><circle cx="${p.x+WBOXW}" cy="${y}" r="3" fill="${wc}"/>`+
+        `<text x="${p.x+12}" y="${y+3.5}" font-size="10" fill="#cdd6df"><tspan font-weight="700">${esc(z.pin)}</tspan> <tspan fill="#9aa7b4" font-family="monospace">${esc((z.color||"")+(z.circuit||""))}</tspan> <tspan fill="#7e8b99">${esc(String(z.signal||"").slice(0,20))}</tspan></text>`+
+        `<rect class="wpin" data-cid="${c.id}" data-pin="${esc(String(z.pin))}" x="${p.x}" y="${y-WRH/2}" width="${WBOXW}" height="${WRH}" fill="transparent" pointer-events="all" style="cursor:${wEdit?'crosshair':'default'}"/>`;});
+    BX+=`</g>`;});
+  // external pins on the border + label outside
+  let ST="";
+  stubList.forEach(s=>{const sp=WSTUBP[s.key];const leftEdge=Math.abs(sp.x-WENV.x0)<1;const lx=leftEdge?sp.x-10:sp.x+17;const anc=leftEdge?"end":"start";
+    const selS=selPin&&selPin.cid===s.connId&&String(selPin.pin)===String(s.pin);
+    const top=(s.signal||s.wire)?((s.signal?esc(s.signal):"")+(s.wire?((s.signal?" ":"")+"("+esc(s.wire)+")"):"")+" · "+esc(s.pin)):(esc(s.ref)+" · "+esc(s.pin));
+    const bot=esc(s.node)+" - "+esc(s.ref);
+    ST+=`<g class="wstub" data-key="${esc(s.key)}" data-extcid="${esc(s.connId||"")}" data-extpin="${esc(String(s.pin))}" style="cursor:${wEdit?'pointer':'grab'}">`+
+    (selS?`<rect x="${sp.x-9}" y="${sp.y-9}" width="18" height="18" rx="4" fill="#4aa3ff22" stroke="#4aa3ff" stroke-width="2"/>`:``)+
+    `<rect x="${sp.x-6}" y="${sp.y-6}" width="12" height="12" rx="2" fill="#0d1218" stroke="#a26bd6" stroke-width="2"/>`+
+    `<text x="${lx}" y="${sp.y-2}" text-anchor="${anc}" font-size="11" font-weight="700" fill="#c79be8">${top}</text>`+
+    `<text x="${lx}" y="${sp.y+11}" text-anchor="${anc}" font-size="9" fill="#9aa7b4">${bot}</text></g>`;});
+  let HL="";
+  if(selLink){const ld=linkDraw.find(x=>x.key===selLink);if(ld){
+    ld.ends.forEach(ep=>{const p=WPOS[ep.connId];if(!p)return;const ry=p.y+WHEAD+ep.j*WRH;HL+=`<rect x="${p.x+1}" y="${ry+1}" width="${WBOXW-2}" height="${WRH-2}" rx="3" fill="#f4d03f22" stroke="#f4d03f" stroke-width="2"/>`;});
+    if(ld.stub){const sp=WSTUBP[ld.stub];if(sp)HL+=`<rect x="${sp.x-8}" y="${sp.y-8}" width="16" height="16" rx="3" fill="none" stroke="#f4d03f" stroke-width="2.5"/>`;}}}
+  $("wireSvgBox").innerHTML=`<svg id="wireSvg" width="${Wt}" height="${Ht}" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica,Arial,sans-serif">${ENV}${L}${BX}${ST}${HL}${DEL}</svg>`;}
+function deleteSelLink(){if(!selLink||!WLINKS)return;const ld=WLINKS.find(x=>x.key===selLink);if(!ld||!ld.link)return;const key=hcLinkKey(ld.link);
+  const man=(M.links||[]).find(x=>hcLinkKey(x)===key);
+  if(man){M.links=M.links.filter(x=>x.id!==man.id);}else{if(!M.linksDisabled.includes(key))M.linksDisabled.push(key);}
+  selLink=null;dsave();recomputeWires();}
+$("wireSvgBox").addEventListener("mousedown",e=>{wmoved=false;const svg=$("wireSvg");if(!svg)return;const r=svg.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;
+  const hnd=e.target.closest(".whandle");if(hnd){wdrag={type:"env",h:hnd.dataset.h,sx:x,sy:y,env:{...WENV}};e.preventDefault();return;}
+  const st=e.target.closest(".wstub");if(st){wdrag={type:"stub",key:st.dataset.key};e.preventDefault();return;}
+  const g=e.target.closest(".wbox");if(g){const cid=g.dataset.cid;wdrag={type:"box",cid,ox:x-WPOS[cid].x,oy:y-WPOS[cid].y};e.preventDefault();}});
+window.addEventListener("mousemove",e=>{if(!wdrag)return;const svg=$("wireSvg");if(!svg)return;const r=svg.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;wmoved=true;
+  if(wdrag.type==="box"){WPOS[wdrag.cid].x=Math.max(0,Math.round(x-wdrag.ox));WPOS[wdrag.cid].y=Math.max(0,Math.round(y-wdrag.oy));}
+  else if(wdrag.type==="stub"){const sp=snapPerim(WENV,x,y);WSTUB[wdrag.key]={x:Math.round(sp.x),y:Math.round(sp.y)};}
+  else if(wdrag.type==="env"){const dx=x-wdrag.sx,dy=y-wdrag.sy,o={...wdrag.env},hh=wdrag.h;
+    if(hh.indexOf("w")>=0)o.x0=Math.round(wdrag.env.x0+dx);if(hh.indexOf("e")>=0)o.x1=Math.round(wdrag.env.x1+dx);
+    if(hh.indexOf("n")>=0)o.y0=Math.round(wdrag.env.y0+dy);if(hh.indexOf("s")>=0)o.y1=Math.round(wdrag.env.y1+dy);
+    if(o.x1-o.x0<220){if(hh.indexOf("w")>=0)o.x0=o.x1-220;else o.x1=o.x0+220;}
+    if(o.y1-o.y0<150){if(hh.indexOf("n")>=0)o.y0=o.y1-150;else o.y1=o.y0+150;}
+    envOverride=o;}
+  wireRender();});
+window.addEventListener("mouseup",()=>{if(wdrag){wdrag=null;saveWireLayout();}});
+$("wireSvgBox").addEventListener("click",e=>{if(wmoved)return;
+  const del=e.target.closest(".wdellink");if(del){deleteSelLink();return;}
+  const lk=e.target.closest(".wlink");if(lk){selLink=(selLink===lk.dataset.key)?null:lk.dataset.key;wireRender();return;}
+  if(!wEdit)return;
+  const st=e.target.closest(".wstub");if(st&&st.dataset.extcid){handlePinClick(st.dataset.extcid,st.dataset.extpin);return;}
+  const pin=e.target.closest(".wpin");if(pin)handlePinClick(pin.dataset.cid,pin.dataset.pin);});
+$("wEditChk").addEventListener("change",function(){wEdit=this.checked;selPin=null;wireRender();});
+$("wireClose").onclick=()=>{selPin=null;$("wireov").classList.remove("show");};
+function closeP(){$("ov").classList.remove("show");}
+let popPos=null,popDrag=null;
+function placePopup(){const md=$("popModal");if(!md)return;if(popPos){md.style.left=popPos.x+"px";md.style.top=popPos.y+"px";}else{const w=md.offsetWidth||560;md.style.left=Math.max(20,(window.innerWidth-w)/2)+"px";md.style.top="90px";}}
+$("mh").addEventListener("mousedown",e=>{if(e.target.closest(".x"))return;const md=$("popModal");const r=md.getBoundingClientRect();popDrag={ox:e.clientX-r.left,oy:e.clientY-r.top};e.preventDefault();});
+window.addEventListener("mousemove",e=>{if(!popDrag)return;let x=e.clientX-popDrag.ox,y=e.clientY-popDrag.oy;x=Math.max(0,Math.min(x,window.innerWidth-80));y=Math.max(0,Math.min(y,window.innerHeight-40));const md=$("popModal");md.style.left=x+"px";md.style.top=y+"px";popPos={x,y};});
+window.addEventListener("mouseup",()=>{popDrag=null;});
+document.addEventListener("keydown",e=>{
+  if((e.key==="Delete"||e.key==="Backspace")&&selLink&&wEdit&&$("wireov").classList.contains("show")){e.preventDefault();deleteSelLink();return;}
+  if(e.key==="Escape"){if(selLink){selLink=null;wireRender();return;}if(selPin){selPin=null;wireRender();return;}closeP();$("wireov").classList.remove("show");}});
+
+/* ---- drag ---- */
+let drag=null,moved=false;
+function svgPt(e){const svg=$("svg"),r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
+  return{x:vb.x+(e.clientX-r.left)/r.width*vb.width,y:vb.y+(e.clientY-r.top)/r.height*vb.height};}
+$("svgbox").addEventListener("mousedown",e=>{moved=false;const bd=e.target.closest(".boxdrag");if(!bd)return;
+  const h=M.harnesses.find(x=>x.id===bd.dataset.hid);const p=svgPt(e);drag={h,ox:p.x-h.box.x,oy:p.y-h.box.y};dragging=true;
+  $("svg").style.cursor="grabbing";e.preventDefault();});
+window.addEventListener("mousemove",e=>{if(!drag)return;const p=svgPt(e);drag.h.box.x=Math.round(Math.max(0,p.x-drag.ox));drag.h.box.y=Math.round(Math.max(0,p.y-drag.oy));moved=true;diagram();});
+window.addEventListener("mouseup",()=>{if(drag){const wasMoved=moved;drag=null;dragging=false;const s=$("svg");if(s)s.style.cursor="";if(wasMoved){dsave();diagram();}}});
+$("zoomIn").onclick=()=>{zoom=Math.min(4,zoom*1.25);applyZoom();};
+$("zoomOut").onclick=()=>{zoom=Math.max(0.3,zoom/1.25);applyZoom();};
+$("zoomFit").onclick=()=>{fitView();};
+window.addEventListener("resize",applyZoom);
+$("svgbox").addEventListener("click",e=>{const p=e.target.closest(".port");if(p&&!moved)openPopup(p.dataset.port);});
+$("svgbox").addEventListener("dblclick",e=>{if(e.target.closest(".port"))return;const bd=e.target.closest(".boxdrag");if(bd)openHarnessWiring(bd.dataset.hid);});
+
+/* ---- toolbar ---- */
+$("reloadBtn").onclick=async()=>{M=await hcLoadAsync();fitView();};
+$("onlyMatched").addEventListener("change",diagram);
+$("printBtn").onclick=()=>window.print();
+$("importBtn").onclick=()=>$("jsonpick").click();
+$("jsonpick").addEventListener("change",function(){const f=this.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{M=hcNormalize(JSON.parse(r.result));dsave();fitView();}catch(err){alert("Invalid JSON: "+err.message);}};r.readAsText(f);this.value="";});
+fitView();
+(async()=>{ if(typeof HC_isServer==="function"&&HC_isServer()){ try{ M=await hcLoadAsync(); fitView(); }catch(e){} } })();
+</script>
+</body>
+</html>

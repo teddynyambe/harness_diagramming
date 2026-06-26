@@ -1,0 +1,47 @@
+# Harness Bench — deployable stack (nginx static + FastAPI persistence).
+#
+#   cd deploy
+#   cp .env.example .env        # then edit DATA_DIR / HOST_PORT if you like
+#   docker compose up -d --build
+#   open http://<server>:8270
+#
+# Config + backups persist to the host folder set by DATA_DIR (default ./data).
+name: harness-bench
+
+services:
+  api:
+    build: ./backend
+    image: harness-bench-api:latest
+    container_name: harness-bench-api
+    environment:
+      HARNESS_DATA_DIR: /data
+      HARNESS_AUTH_DISABLED: "${AUTH_DISABLED:-true}"
+      HARNESS_MAX_BACKUPS: "${MAX_BACKUPS:-50}"
+    volumes:
+      - "${DATA_DIR:-./data}:/data"           # <-- persisted on the server
+    networks: [harness-net]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health').status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  web:
+    image: nginx:alpine
+    container_name: harness-bench-web
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${HOST_PORT:-8270}:80"               # serve on port 8270
+    volumes:
+      - ../:/usr/share/nginx/html:ro          # the app files (HTML/JS) served read-only
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [harness-net]
+    restart: unless-stopped
+
+networks:
+  harness-net:
+    name: harness-net
