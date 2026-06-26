@@ -53,6 +53,7 @@
   .wirehead .t{font-weight:700;font-size:15px}.wirehead .s{font-size:12px;color:var(--muted)}
   .wirebody{flex:1;overflow:auto;background-image:radial-gradient(circle,#161b22 1px,transparent 1px);background-size:22px 22px}
   #wireSvg{display:block}.wbox{cursor:grab}
+  .wirefoot{display:flex;align-items:center;gap:12px;padding:7px 12px;border-top:1px solid var(--line);background:var(--panel)}
   @media print{header,.legend,.hint,#importBtn,#reloadBtn,.toolbtns{display:none!important}.stage{border-color:#bbb}#svg text{fill:#000!important}}
 </style>
 </head>
@@ -92,6 +93,10 @@
     <label class="s" style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#4aa3ff"><input type="checkbox" id="wEditChk"> ✎ link pins (click a pin then another to connect inside this harness)</label>
     <button id="wireClose">✕ close</button></div>
   <div class="wirebody"><div id="wireSvgBox"></div></div>
+  <div class="wirefoot">
+    <div class="zoombar"><button id="wzOut" title="zoom out">−</button><span class="z" id="wzPct">100%</span><button id="wzIn" title="zoom in">+</button><button id="wzFit" title="fit" style="font-size:12px">Fit</button></div>
+    <span class="s" style="color:var(--muted)">scroll the area to pan · drag boxes/pins to arrange</span>
+  </div>
 </div>
 <input type="file" id="jsonpick" accept="application/json,.json" style="display:none">
 <script src="harness_config.js"></script>
@@ -201,7 +206,8 @@ function openPopup(key){const i=key.indexOf("/");const hid=key.slice(0,i),cid=ke
   $("mb").innerHTML=b;$("ov").classList.add("show");placePopup();
 }
 /* ---- visual harness wiring view ---- */
-let WCTX=null, WPOS={}, wdrag=null, wmoved=false, selPin=null, wEdit=false, envOverride=null, WSTUB={}, WENV=null, WSTUBP={}, selLink=null, WLINKS=null;
+let WCTX=null, WPOS={}, wdrag=null, wmoved=false, selPin=null, wEdit=false, envOverride=null, WSTUB={}, WENV=null, WSTUBP={}, selLink=null, WLINKS=null, wZoom=1, WWT=900, WHT=600;
+function wpt(e){const svg=$("wireSvg");if(!svg)return{x:0,y:0};const r=svg.getBoundingClientRect();const vw=(svg.viewBox&&svg.viewBox.baseVal.width)||r.width||1,vh=(svg.viewBox&&svg.viewBox.baseVal.height)||r.height||1;return{x:(e.clientX-r.left)/r.width*vw,y:(e.clientY-r.top)/r.height*vh};}
 const WHEAD=44, WRH=22, WBOXW=250;
 function buildWireData(hid){const h=M.harnesses.find(x=>x.id===hid);const conns=h?h.connectors||[]:[];const idx=hcConnIndex(M);
   const rowCount={};conns.forEach(c=>rowCount[c.id]=(c.circuits||[]).length||1);
@@ -220,7 +226,7 @@ function buildWireData(hid){const h=M.harnesses.find(x=>x.id===hid);const conns=
   const stubList=Object.values(stubMap).filter(s=>String(s.pin).trim()!=="");
   stubList.forEach(s=>{const E=idx[s.connId];if(E&&E.conn){const z=(E.conn.circuits||[]).find(x=>String(x.pin)===String(s.pin));if(z){s.signal=z.signal||"";s.wire=(z.color||"")+(z.circuit||"");}}});
   return {hid,conns,intLines,extLinks,stubList,rowCount};}
-function openHarnessWiring(hid){const h=M.harnesses.find(x=>x.id===hid);if(!h)return;selPin=null;selLink=null;
+function openHarnessWiring(hid){const h=M.harnesses.find(x=>x.id===hid);if(!h)return;selPin=null;selLink=null;wZoom=1;
   WCTX=buildWireData(hid);const conns=WCTX.conns;const INTER=hcInterConnectors(M);
   const saved=h.wire||{};
   WPOS=Object.assign({},saved.pos||{});envOverride=saved.env||null;WSTUB=Object.assign({},saved.stubs||{});
@@ -314,16 +320,18 @@ function wireRender(){if(!WCTX)return;const {conns,intLines,extLinks,stubList,hi
   if(selLink){const ld=linkDraw.find(x=>x.key===selLink);if(ld){
     ld.ends.forEach(ep=>{const p=WPOS[ep.connId];if(!p)return;const ry=p.y+WHEAD+ep.j*WRH;HL+=`<rect x="${p.x+1}" y="${ry+1}" width="${WBOXW-2}" height="${WRH-2}" rx="3" fill="#f4d03f22" stroke="#f4d03f" stroke-width="2"/>`;});
     if(ld.stub){const sp=WSTUBP[ld.stub];if(sp)HL+=`<rect x="${sp.x-8}" y="${sp.y-8}" width="16" height="16" rx="3" fill="none" stroke="#f4d03f" stroke-width="2.5"/>`;}}}
-  $("wireSvgBox").innerHTML=`<svg id="wireSvg" width="${Wt}" height="${Ht}" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica,Arial,sans-serif">${ENV}${L}${BX}${ST}${HL}${DEL}</svg>`;}
+  WWT=Wt;WHT=Ht;
+  $("wireSvgBox").innerHTML=`<svg id="wireSvg" viewBox="0 0 ${Wt} ${Ht}" width="${Math.round(Wt*wZoom)}" height="${Math.round(Ht*wZoom)}" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica,Arial,sans-serif">${ENV}${L}${BX}${ST}${HL}${DEL}</svg>`;
+  const _p=$("wzPct");if(_p)_p.textContent=Math.round(wZoom*100)+"%";}
 function deleteSelLink(){if(!selLink||!WLINKS)return;const ld=WLINKS.find(x=>x.key===selLink);if(!ld||!ld.link)return;const key=hcLinkKey(ld.link);
   const man=(M.links||[]).find(x=>hcLinkKey(x)===key);
   if(man){M.links=M.links.filter(x=>x.id!==man.id);}else{if(!M.linksDisabled.includes(key))M.linksDisabled.push(key);}
   selLink=null;dsave();recomputeWires();}
-$("wireSvgBox").addEventListener("mousedown",e=>{wmoved=false;const svg=$("wireSvg");if(!svg)return;const r=svg.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;
+$("wireSvgBox").addEventListener("mousedown",e=>{wmoved=false;const svg=$("wireSvg");if(!svg)return;const p=wpt(e),x=p.x,y=p.y;
   const hnd=e.target.closest(".whandle");if(hnd){wdrag={type:"env",h:hnd.dataset.h,sx:x,sy:y,env:{...WENV}};e.preventDefault();return;}
   const st=e.target.closest(".wstub");if(st){wdrag={type:"stub",key:st.dataset.key};e.preventDefault();return;}
   const g=e.target.closest(".wbox");if(g){const cid=g.dataset.cid;wdrag={type:"box",cid,ox:x-WPOS[cid].x,oy:y-WPOS[cid].y};e.preventDefault();}});
-window.addEventListener("mousemove",e=>{if(!wdrag)return;const svg=$("wireSvg");if(!svg)return;const r=svg.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;wmoved=true;
+window.addEventListener("mousemove",e=>{if(!wdrag)return;const svg=$("wireSvg");if(!svg)return;const p=wpt(e),x=p.x,y=p.y;wmoved=true;
   if(wdrag.type==="box"){WPOS[wdrag.cid].x=Math.max(0,Math.round(x-wdrag.ox));WPOS[wdrag.cid].y=Math.max(0,Math.round(y-wdrag.oy));}
   else if(wdrag.type==="stub"){const sp=snapPerim(WENV,x,y);WSTUB[wdrag.key]={x:Math.round(sp.x),y:Math.round(sp.y)};}
   else if(wdrag.type==="env"){const dx=x-wdrag.sx,dy=y-wdrag.sy,o={...wdrag.env},hh=wdrag.h;
@@ -341,6 +349,9 @@ $("wireSvgBox").addEventListener("click",e=>{if(wmoved)return;
   const st=e.target.closest(".wstub");if(st&&st.dataset.extcid){handlePinClick(st.dataset.extcid,st.dataset.extpin);return;}
   const pin=e.target.closest(".wpin");if(pin)handlePinClick(pin.dataset.cid,pin.dataset.pin);});
 $("wEditChk").addEventListener("change",function(){wEdit=this.checked;selPin=null;wireRender();});
+$("wzIn").onclick=()=>{wZoom=Math.min(3,wZoom*1.2);wireRender();};
+$("wzOut").onclick=()=>{wZoom=Math.max(0.2,wZoom/1.2);wireRender();};
+$("wzFit").onclick=()=>{const box=$("wireSvgBox");if(!box)return;const cw=box.clientWidth-24,ch=box.clientHeight-24;wZoom=Math.max(0.2,Math.min(2,Math.min(cw/WWT,ch/WHT)));wireRender();};
 $("wireClose").onclick=()=>{selPin=null;$("wireov").classList.remove("show");};
 function closeP(){$("ov").classList.remove("show");}
 let popPos=null,popDrag=null;
